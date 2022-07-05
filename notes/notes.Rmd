@@ -32,3 +32,8 @@ Filtering data widgets:
 Custom click events with plotly:
 
 - https://plotly.com/javascript/plotlyjs-events/#legend-click-events
+
+Cool input method for maybe deciding which columns to plot and in what order on the Sankey diagram:
+
+- https://rstudio.github.io/sortable/
+- (not all orders make sense though)

@@ -1,0 +1,40 @@
+Notes
+================
+
+-   [Proposal](https://docs.google.com/document/d/14OL0ACZvaSXyBVMY_aaPZR5MSuXbMVegEhk6sPkc3Ec/edit)
+
+### Notes
+
+Possibly helpful packages, tutorials, etc.
+
+Sankey diagrams in ggplot:
+
+-   Unfortunately, no `ggplotly()` won’t translate sankey diagrams from
+    ggplot to plotly, but here’s some non-interactive sankey plots
+-   [`ggsankey`](https://github.com/davidsjoberg/ggsankey)
+-   [`ggforce`](https://ggforce.data-imaginist.com/reference/geom_parallel_sets.html)
+
+Interactive Sankey Plots (although “interactive” doesn’t mean a lot in
+these examples)
+
+-   [`networkD3`](https://christophergandrud.github.io/networkD3/)
+    -   <https://rpubs.com/dmormandy/DV_Sankey>
+    -   <https://www.displayr.com/sankey-diagrams-r/>
+-   `plotly`
+    -   <https://plotly.com/r/sankey-diagram/>
+    -   <https://stackoverflow.com/questions/46680962/creating-sankey-diagram-using-ggplot2-plotly-and-ggplotly>
+
+Filtering data widgets:
+
+-   [`shinyfilter`](https://github.com/jsugarelli/shinyfilter)
+-   [`reactable`](https://glin.github.io/reactable/articles/examples.html#filtering)
+
+Custom click events with plotly:
+
+-   <https://plotly.com/javascript/plotlyjs-events/#legend-click-events>
+
+Cool input method for maybe deciding which columns to plot and in what
+order on the Sankey diagram:
+
+-   <https://rstudio.github.io/sortable/>
+-   (not all orders make sense though)
