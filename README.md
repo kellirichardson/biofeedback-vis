@@ -6,6 +6,8 @@
 
 The goal of biofeedback-vis is to ...
 
+[Notes](notes/notes.md)
+
 # data
 
-`data_663.csv` is preliminary data from 663 studies
+
