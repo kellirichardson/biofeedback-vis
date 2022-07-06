@@ -2,11 +2,15 @@
 #July 5, 2022
 #Sankey Code 
 
-#Comprehensive Sankey 
 library(tidyverse)
 library(ggsankey)
 
+# Read in data ------------------------------------------------------------
+
 articles_raw <- read_csv("data/Data from 663 articles.csv")
+
+
+# Clean data --------------------------------------------------------------
 
 articles <- 
   articles_raw %>%
@@ -25,12 +29,16 @@ unique(articles_raw$`Biological measures`)[10]
 
 #might need to split on "other" first, then split on commas
 
+
+# Plot ---------------------------------------------------------
+
 Sankey <- 
   articles %>%
   make_long(Domain, Biomeasures, Collection, 'Frequency of feedback', Communication, Behaviors, Outcome)
 # head(Sankey)
 
-test_sankey <- 
+#Comprehensive Sankey 
+test_sankey_full <- 
   ggplot(Sankey, aes(x = x, 
                      next_x = next_x, 
                      node = node, 
@@ -43,7 +51,7 @@ test_sankey <-
   theme(legend.position = "none") + 
   xlab(NULL)
 
-test_sankey
+test_sankey_full
 
 #Notes about the above Sankey 
 #The "make_long" function is the main function. This is where you list all the "columns" that are in the Sankey. The order matters here. 
@@ -54,13 +62,13 @@ test_sankey
 #How to filter 
 #Note - the only change from above is on line 51 
 
-Sankey <- 
+Sankey_sub <- 
   articles %>%
   filter(Biomeasures %in% c("Glucose", "Carcinomas")) |> 
   make_long(Domain, Biomeasures, Collection, 'Frequency of feedback', Communication, Behaviors, Outcome)
 
-test_sankey <-
-  ggplot(Sankey, aes(x = x, 
+test_sankey_sub <-
+  ggplot(Sankey_sub, aes(x = x, 
                      next_x = next_x, 
                      node = node, 
                      next_node = next_node,
@@ -72,4 +80,4 @@ test_sankey <-
   theme(legend.position = "none") + 
   xlab(NULL)
 
-test_sankey
+test_sankey_sub
