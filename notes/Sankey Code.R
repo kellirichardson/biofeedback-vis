@@ -26,7 +26,8 @@ articles <-
   separate_rows(Biomeasures, sep = ",(?!\\s)") %>%
   separate_rows(Behaviors, sep = ",(?!\\s)") %>% 
   separate_rows(Collection, sep = ",(?!\\s)") %>%
-  separate_rows('Frequency of feedback', sep = ",(?!\\s)")
+  separate_rows('Frequency of feedback', sep = ",(?!\\s)") %>% 
+  mutate(across(c(Biomeasures, Behaviors), ~if_else(str_detect(., "^Other : "), "Other", .)))
 
 
 
