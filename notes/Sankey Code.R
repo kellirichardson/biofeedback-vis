@@ -14,10 +14,6 @@ articles_raw <- read_csv("data/Data from 663 articles.csv")
 
 # Clean data --------------------------------------------------------------
 
-articles_raw |> 
-  filter(if_any(`Frequency of feedback`, ~str_detect(., "Other :")))
-
-
 articles <-
   articles_raw %>%
   rename(Biomeasures = `Biological measures`) %>% 
@@ -26,15 +22,15 @@ articles <-
   separate_rows(Biomeasures, sep = ",(?!\\s)") %>%
   separate_rows(Behaviors, sep = ",(?!\\s)") %>% 
   separate_rows(Collection, sep = ",(?!\\s)") %>%
-  separate_rows('Frequency of feedback', sep = ",(?!\\s)") %>% 
+  separate_rows('Frequency of feedback', sep = ",(?!\\s)") %>%
+  #replace anything that starts with "Other : " with "Other" to lump categories
   mutate(across(c(Biomeasures, Behaviors), ~if_else(str_detect(., "^Other : "), "Other", .)))
-
-
 
 # Plot ---------------------------------------------------------
 
 Sankey <- 
   articles %>%
+  #ggsankey function to format data for ggplot:
   make_long(Domain, Biomeasures, Collection, 'Frequency of feedback', Communication, Behaviors, Outcome)
 # head(Sankey)
 
@@ -61,7 +57,7 @@ test_sankey_full
 
 
 #How to filter 
-#Note - the only change from above is on line 51 
+#Note - the only change from above is the addition of `filter()`
 
 Sankey_sub <- 
   articles %>%
