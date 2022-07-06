@@ -2,34 +2,53 @@
 #July 5, 2022
 #Sankey Code 
 
-#Comprehensive Sankey 
-library(ggplot2)
-library(ggsankey)
-library(dplyr)
-library(networkD3)
-attach(Sankey_data)
-Sankey <- Sankey_data %>%
-  rename(Biomeasures = `Biological measures`) %>% 
-  separate_rows(Communication, sep = ",", convert = TRUE) %>% 
-  separate_rows(Biomeasures, sep = ",", convert = TRUE) %>% 
-  separate_rows(Behaviors, sep = ",", convert = TRUE) %>%
-  separate_rows(Collection, sep = ",", convert = TRUE) %>%
-  separate_rows('Frequency of feedback', sep = ",", convert = TRUE) %>%
-  make_long(Domain,Biomeasures,Collection, 'Frequency of feedback', Communication, Behaviors, Outcome)
-head(Sankey)
 
-test_sankey <- ggplot(Sankey, aes(x = x, 
-                                  next_x = next_x, 
-                                  node = node, 
-                                  next_node = next_node,
-                                  fill = factor(node),
-                                  label = node)) +
+# Load packages -----------------------------------------------------------
+
+library(tidyverse)
+library(ggsankey)
+
+# Read in data ------------------------------------------------------------
+
+articles_raw <- read_csv("data/Data from 663 articles.csv")
+
+# Clean data --------------------------------------------------------------
+
+articles <-
+  articles_raw %>%
+  rename(Biomeasures = `Biological measures`) %>% 
+  #separate by commas, but only ones that don't have a space after them to keep the "Other : " sentences together
+  separate_rows(Communication, sep = ",(?!\\s)") %>% 
+  separate_rows(Biomeasures, sep = ",(?!\\s)") %>%
+  separate_rows(Behaviors, sep = ",(?!\\s)") %>% 
+  separate_rows(Collection, sep = ",(?!\\s)") %>%
+  separate_rows('Frequency of feedback', sep = ",(?!\\s)") %>%
+  #replace anything that starts with "Other : " with "Other" to lump categories
+  mutate(across(c(Biomeasures, Behaviors), ~if_else(str_detect(., "^Other : "), "Other", .)))
+
+# Plot ---------------------------------------------------------
+
+Sankey <- 
+  articles %>%
+  #ggsankey function to format data for ggplot:
+  make_long(Domain, Biomeasures, Collection, 'Frequency of feedback', Communication, Behaviors, Outcome)
+# head(Sankey)
+
+#Comprehensive Sankey 
+test_sankey_full <- 
+  ggplot(Sankey, aes(x = x, 
+                     next_x = next_x, 
+                     node = node, 
+                     next_node = next_node,
+                     fill = factor(node),
+                     label = node)) +
   geom_sankey(flow.alpha = 0.5) +
   geom_sankey_label(size = 3.5, fill = "white") +
   theme_sankey(base_size = 16) + 
   theme(legend.position = "none") + 
   xlab(NULL)
-test_sankey
+
+test_sankey_full
 
 #Notes about the above Sankey 
 #The "make_long" function is the main function. This is where you list all the "columns" that are in the Sankey. The order matters here. 
@@ -38,31 +57,24 @@ test_sankey
 
 
 #How to filter 
-#Note - the only change from above is on line 49 
-library(ggplot2)
-library(ggsankey)
-library(dplyr)
-library(networkD3)
-attach(Sankey_data)
-Sankey <- Sankey_data %>%
-  rename(Biomeasures = `Biological measures`) %>% 
-  filter(Biomeasures == "Glucose") %>% 
-  separate_rows(Communication, sep = ",", convert = TRUE) %>% 
-  separate_rows(Behaviors, sep = ",", convert = TRUE) %>%
-  separate_rows(Collection, sep = ",", convert = TRUE) %>%
-  separate_rows('Frequency of feedback', sep = ",", convert = TRUE) %>%
-  make_long(Domain,Biomeasures,Collection, 'Frequency of feedback', Communication, Behaviors, Outcome)
-head(Sankey)
+#Note - the only change from above is the addition of `filter()`
 
-test_sankey <- ggplot(Sankey, aes(x = x, 
-                                  next_x = next_x, 
-                                  node = node, 
-                                  next_node = next_node,
-                                  fill = factor(node),
-                                  label = node)) +
+Sankey_sub <- 
+  articles %>%
+  filter(Biomeasures %in% c("Glucose", "Carcinomas")) %>% 
+  make_long(Domain, Biomeasures, Collection, 'Frequency of feedback', Communication, Behaviors, Outcome)
+
+test_sankey_sub <-
+  ggplot(Sankey_sub, aes(x = x, 
+                     next_x = next_x, 
+                     node = node, 
+                     next_node = next_node,
+                     fill = factor(node),
+                     label = node)) +
   geom_sankey(flow.alpha = 0.5) +
   geom_sankey_label(size = 3.5, fill = "white") +
   theme_sankey(base_size = 16) + 
   theme(legend.position = "none") + 
   xlab(NULL)
-test_sankey
+
+test_sankey_sub
