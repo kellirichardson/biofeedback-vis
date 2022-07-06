@@ -2,6 +2,9 @@
 #July 5, 2022
 #Sankey Code 
 
+
+# Load packages -----------------------------------------------------------
+
 library(tidyverse)
 library(ggsankey)
 
@@ -9,25 +12,22 @@ library(ggsankey)
 
 articles_raw <- read_csv("data/Data from 663 articles.csv")
 
-
 # Clean data --------------------------------------------------------------
 
-articles <- 
+articles_raw |> 
+  filter(if_any(`Frequency of feedback`, ~str_detect(., "Other :")))
+
+
+articles <-
   articles_raw %>%
   rename(Biomeasures = `Biological measures`) %>% 
-  separate_rows(Communication, sep = ",", convert = TRUE) %>% 
-  separate_rows(Biomeasures, sep = ",", convert = TRUE) %>% 
-  separate_rows(Behaviors, sep = ",", convert = TRUE) %>%
-  separate_rows(Collection, sep = ",", convert = TRUE) %>%
-  separate_rows('Frequency of feedback', sep = ",", convert = TRUE) 
+  #separate by commas, but only ones that don't have a space after them to keep the "Other : " sentences together
+  separate_rows(Communication, sep = ",(?!\\s)") %>% 
+  separate_rows(Biomeasures, sep = ",(?!\\s)") %>%
+  separate_rows(Behaviors, sep = ",(?!\\s)") %>% 
+  separate_rows(Collection, sep = ",(?!\\s)") %>%
+  separate_rows('Frequency of feedback', sep = ",(?!\\s)")
 
-#TODO: needs additional cleanup probably.  E.g. I think everything after "Other :" is supposed to be one entry?
-biomeas <- unique(articles$Biomeasures)
-biomeas[12:14]
-#...comes from...
-unique(articles_raw$`Biological measures`)[10]
-
-#might need to split on "other" first, then split on commas
 
 
 # Plot ---------------------------------------------------------
@@ -64,7 +64,7 @@ test_sankey_full
 
 Sankey_sub <- 
   articles %>%
-  filter(Biomeasures %in% c("Glucose", "Carcinomas")) |> 
+  filter(Biomeasures %in% c("Glucose", "Carcinomas")) %>% 
   make_long(Domain, Biomeasures, Collection, 'Frequency of feedback', Communication, Behaviors, Outcome)
 
 test_sankey_sub <-
