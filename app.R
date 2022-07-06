@@ -68,7 +68,7 @@ ui <- fluidPage(
     )
   ),
   fluidRow(
-    actionButton("submit_filter", "Refresh Plot")
+    actionButton("refresh", "Refresh Plot")
   ),
   fluidRow(
     plotOutput("sankey")
@@ -79,34 +79,51 @@ ui <- fluidPage(
 # Server ------------------------------------------------------------------
 
 server <- function(input, output, session) {
- output$sankey <- renderPlot({
-   sankey_data <-
-     articles %>%
-     filter(
-       Domain %in% input$Domain,
-       Biomeasures %in% input$Biomeasures,
-       Collection %in% input$Collection,
-       `Frequency of feedback` %in% input$freq_feedback,
-       Communication %in% input$Communication,
-       Behaviors %in% input$Behaviors,
-       Outcome %in% input$Outcome
-       ) %>% 
-     make_long(Domain, Biomeasures, Collection, 'Frequency of feedback', Communication, Behaviors, Outcome)
-   
-   ggplot(sankey_data,
-          aes(x = x, 
-              next_x = next_x, 
-              node = node, 
-              next_node = next_node,
-              fill = factor(node),
-              label = node)) +
-     geom_sankey(flow.alpha = 0.5) +
-     geom_sankey_label(size = 3.5, fill = "white") +
-     theme_sankey(base_size = 16) + 
-     theme(legend.position = "none") + 
-     xlab(NULL)
- })
-   
+  
+  #reactive expression to filter data based on checkbox input
+  sankey_data <- reactive({
+    articles %>%
+      filter(
+        Domain %in% input$Domain,
+        Biomeasures %in% input$Biomeasures,
+        Collection %in% input$Collection,
+        `Frequency of feedback` %in% input$freq_feedback,
+        Communication %in% input$Communication,
+        Behaviors %in% input$Behaviors,
+        Outcome %in% input$Outcome
+      ) %>% 
+      ggsankey::make_long(
+        Domain,
+        Biomeasures,
+        Collection,
+        `Frequency of feedback`,
+        Communication,
+        Behaviors,
+        Outcome
+      )
+  })
+  
+  #render the plot
+  output$sankey <- renderPlot({
+    #Take a dependency on the refresh button
+    input$refresh
+    
+    #use isolate() so the plot only updates when the button is clicked, not when
+    #sankey_data is updated
+    ggplot(isolate(sankey_data()),
+           aes(x = x, 
+               next_x = next_x, 
+               node = node, 
+               next_node = next_node,
+               fill = factor(node),
+               label = node)) +
+      geom_sankey(flow.alpha = 0.5) +
+      geom_sankey_label(size = 3.5, fill = "white") +
+      theme_sankey(base_size = 16) + 
+      theme(legend.position = "none") + 
+      xlab(NULL)
+  })
+  
 }
 
 shinyApp(ui, server)
