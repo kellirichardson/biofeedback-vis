@@ -3,32 +3,46 @@
 #Sankey Code 
 
 #Comprehensive Sankey 
-library(ggplot2)
+library(tidyverse)
 library(ggsankey)
-library(dplyr)
-library(networkD3)
-attach(Sankey_data)
-Sankey <- Sankey_data %>%
+
+articles_raw <- read_csv("data/Data from 663 articles.csv")
+
+articles <- 
+  articles_raw %>%
   rename(Biomeasures = `Biological measures`) %>% 
   separate_rows(Communication, sep = ",", convert = TRUE) %>% 
   separate_rows(Biomeasures, sep = ",", convert = TRUE) %>% 
   separate_rows(Behaviors, sep = ",", convert = TRUE) %>%
   separate_rows(Collection, sep = ",", convert = TRUE) %>%
-  separate_rows('Frequency of feedback', sep = ",", convert = TRUE) %>%
-  make_long(Domain,Biomeasures,Collection, 'Frequency of feedback', Communication, Behaviors, Outcome)
-head(Sankey)
+  separate_rows('Frequency of feedback', sep = ",", convert = TRUE) 
 
-test_sankey <- ggplot(Sankey, aes(x = x, 
-                                  next_x = next_x, 
-                                  node = node, 
-                                  next_node = next_node,
-                                  fill = factor(node),
-                                  label = node)) +
+#TODO: needs additional cleanup probably.  E.g. I think everything after "Other :" is supposed to be one entry?
+biomeas <- unique(articles$Biomeasures)
+biomeas[12:14]
+#...comes from...
+unique(articles_raw$`Biological measures`)[10]
+
+#might need to split on "other" first, then split on commas
+
+Sankey <- 
+  articles %>%
+  make_long(Domain, Biomeasures, Collection, 'Frequency of feedback', Communication, Behaviors, Outcome)
+# head(Sankey)
+
+test_sankey <- 
+  ggplot(Sankey, aes(x = x, 
+                     next_x = next_x, 
+                     node = node, 
+                     next_node = next_node,
+                     fill = factor(node),
+                     label = node)) +
   geom_sankey(flow.alpha = 0.5) +
   geom_sankey_label(size = 3.5, fill = "white") +
   theme_sankey(base_size = 16) + 
   theme(legend.position = "none") + 
   xlab(NULL)
+
 test_sankey
 
 #Notes about the above Sankey 
@@ -38,31 +52,24 @@ test_sankey
 
 
 #How to filter 
-#Note - the only change from above is on line 49 
-library(ggplot2)
-library(ggsankey)
-library(dplyr)
-library(networkD3)
-attach(Sankey_data)
-Sankey <- Sankey_data %>%
-  rename(Biomeasures = `Biological measures`) %>% 
-  filter(Biomeasures == "Glucose") %>% 
-  separate_rows(Communication, sep = ",", convert = TRUE) %>% 
-  separate_rows(Behaviors, sep = ",", convert = TRUE) %>%
-  separate_rows(Collection, sep = ",", convert = TRUE) %>%
-  separate_rows('Frequency of feedback', sep = ",", convert = TRUE) %>%
-  make_long(Domain,Biomeasures,Collection, 'Frequency of feedback', Communication, Behaviors, Outcome)
-head(Sankey)
+#Note - the only change from above is on line 51 
 
-test_sankey <- ggplot(Sankey, aes(x = x, 
-                                  next_x = next_x, 
-                                  node = node, 
-                                  next_node = next_node,
-                                  fill = factor(node),
-                                  label = node)) +
+Sankey <- 
+  articles %>%
+  filter(Biomeasures %in% c("Glucose", "Carcinomas")) |> 
+  make_long(Domain, Biomeasures, Collection, 'Frequency of feedback', Communication, Behaviors, Outcome)
+
+test_sankey <-
+  ggplot(Sankey, aes(x = x, 
+                     next_x = next_x, 
+                     node = node, 
+                     next_node = next_node,
+                     fill = factor(node),
+                     label = node)) +
   geom_sankey(flow.alpha = 0.5) +
   geom_sankey_label(size = 3.5, fill = "white") +
   theme_sankey(base_size = 16) + 
   theme(legend.position = "none") + 
   xlab(NULL)
+
 test_sankey
