@@ -7,6 +7,8 @@ Notes
 
 Possibly helpful packages, tutorials, etc.
 
+-   <https://www.data-to-viz.com/graph/sankey.html>
+
 Sankey diagrams in ggplot:
 
 -   Unfortunately, no `ggplotly()` won’t translate sankey diagrams from
