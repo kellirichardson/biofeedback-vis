@@ -1,5 +1,6 @@
 library(shiny)
 library(tidyverse)
+library(ggsankey)
 
 articles  <- read_csv("data/articles_clean.csv")
 
@@ -71,7 +72,8 @@ ui <- fluidPage(
     actionButton("refresh", "Refresh Plot")
   ),
   fluidRow(
-    plotOutput("sankey")
+    plotOutput("sankey"),
+    downloadButton("download", "Download Filtered Data")
   )
 )
 
@@ -91,16 +93,7 @@ server <- function(input, output, session) {
         Communication %in% input$Communication,
         Behaviors %in% input$Behaviors,
         Outcome %in% input$Outcome
-      ) %>% 
-      ggsankey::make_long(
-        Domain,
-        Biomeasures,
-        Collection,
-        `Frequency of feedback`,
-        Communication,
-        Behaviors,
-        Outcome
-      )
+      ) 
   })
   
   #render the plot
@@ -110,7 +103,21 @@ server <- function(input, output, session) {
     
     #use isolate() so the plot only updates when the button is clicked, not when
     #sankey_data is updated
-    ggplot(isolate(sankey_data()),
+    #could still update highlighting with every change by using sankey_data() in
+    #a scale_color* call possibly.  Worry about this later in case we don't end
+    #up sticking with ggplot
+    plotdf <- isolate(sankey_data()) %>% 
+      ggsankey::make_long(
+        Domain,
+        Biomeasures,
+        Collection,
+        `Frequency of feedback`,
+        Communication,
+        Behaviors,
+        Outcome
+      )
+    
+    ggplot(plotdf,
            aes(x = x, 
                next_x = next_x, 
                node = node, 
@@ -124,6 +131,14 @@ server <- function(input, output, session) {
       xlab(NULL)
   })
   
+  output$download <- downloadHandler(
+    filename = function() {
+      paste('data-', Sys.Date(), '.csv', sep='')
+    },
+    content = function(file) {
+      write.csv(sankey_data(), file)
+    }
+  )
 }
 
 shinyApp(ui, server)
