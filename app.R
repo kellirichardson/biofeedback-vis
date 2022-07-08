@@ -7,74 +7,134 @@ articles  <- read_csv("data/articles_clean.csv")
 # UI ----------------------------------------------------------------------
 
 ui <- fluidPage(
-  fluidRow(
-    #Filter section.  For now just two sets of checkboxes
-    column(2,
-           checkboxGroupInput(
-             inputId = "Domain",
-             label = "Domain",
-             choices = unique(articles$Domain),
-             selected = unique(articles$Domain)
-           )
+  sidebarLayout(
+    sidebarPanel(
+      width = 3,
+
+      selectizeInput(
+        inputId = "Domain",
+        label = "Domain",
+        choices = unique(articles$Domain),
+        selected = unique(articles$Domain),
+        multiple = TRUE
+      ),
+      selectizeInput(
+        inputId = "Biomeasures",
+        label = "Biomeasures",
+        choices = unique(articles$Biomeasures),
+        selected = unique(articles$Biomeasures),
+        multiple = TRUE
+      ),
+      selectizeInput(
+        inputId = "Collection",
+        label = "Collection",
+        choices = unique(articles$Collection),
+        selected = unique(articles$Collection),
+        multiple = TRUE
+      ),
+      selectizeInput(
+        inputId = "freq_feedback",
+        label = "Frequency of feedback",
+        choices = unique(articles$`Frequency of feedback`),
+        selected = unique(articles$`Frequency of feedback`),
+        multiple = TRUE
+      ),
+      selectizeInput(
+        inputId = "Communication",
+        label = "Communication",
+        choices = unique(articles$Communication),
+        selected = unique(articles$Communication),
+        multiple = TRUE
+      ),
+      selectizeInput(
+        inputId = "Behaviors",
+        label = "Behaviors",
+        choices = unique(articles$Behaviors),
+        selected = unique(articles$Behaviors),
+        multiple = TRUE
+      ),
+      selectizeInput(
+        inputId = "Outcome",
+        label = "Outcome",
+        choices = unique(articles$Outcome),
+        selected = unique(articles$Outcome),
+        multiple = TRUE
+      )
     ),
-    column(2,
-           checkboxGroupInput(
-             inputId = "Biomeasures",
-             label = "Biomeasures",
-             choices = unique(articles$Biomeasures),
-             selected = unique(articles$Biomeasures)
-           ),
-    ),
-    column(2,
-           checkboxGroupInput(
-             inputId = "Collection",
-             label = "Collection",
-             choices = unique(articles$Collection),
-             selected = unique(articles$Collection)
-           )
-    ),
-    column(2,
-           checkboxGroupInput(
-             inputId = "freq_feedback",
-             label = "Frequency of feedback",
-             choices = unique(articles$`Frequency of feedback`),
-             selected = unique(articles$`Frequency of feedback`)
-           )
-    ),
-    column(2,
-           checkboxGroupInput(
-             inputId = "Communication",
-             label = "Communication",
-             choices = unique(articles$Communication),
-             selected = unique(articles$Communication)
-           )
-    ),
-    column(2,
-           checkboxGroupInput(
-             inputId = "Behaviors",
-             label = "Behaviors",
-             choices = unique(articles$Behaviors),
-             selected = unique(articles$Behaviors)
-           )
+    mainPanel(
+      actionButton("refresh", "Refresh Plot"),
+      plotOutput("sankey"),
+      downloadButton("download", "Download Filtered Data")
     )
-  ),
-  fluidRow(
-    column(2,
-           checkboxGroupInput(
-             inputId = "Outcome",
-             label = "Outcome",
-             choices = unique(articles$Outcome),
-             selected = unique(articles$Outcome)
-           )
-    )
-  ),
-  fluidRow(
-    actionButton("refresh", "Refresh Plot")
-  ),
-  fluidRow(
-    plotOutput("sankey"),
-    downloadButton("download", "Download Filtered Data")
   )
+  # fluidRow(
+  #   #Filter section.  For now just two sets of checkboxes
+  #   column(2,
+  #          checkboxGroupInput(
+  #            inputId = "Domain",
+  #            label = "Domain",
+  #            choices = unique(articles$Domain),
+  #            selected = unique(articles$Domain)
+  #          )
+  #   ),
+  #   column(2,
+  #          checkboxGroupInput(
+  #            inputId = "Biomeasures",
+  #            label = "Biomeasures",
+  #            choices = unique(articles$Biomeasures),
+  #            selected = unique(articles$Biomeasures)
+  #          ),
+  #   ),
+  #   column(2,
+  #          checkboxGroupInput(
+  #            inputId = "Collection",
+  #            label = "Collection",
+  #            choices = unique(articles$Collection),
+  #            selected = unique(articles$Collection)
+  #          )
+  #   ),
+  #   column(2,
+  #          checkboxGroupInput(
+  #            inputId = "freq_feedback",
+  #            label = "Frequency of feedback",
+  #            choices = unique(articles$`Frequency of feedback`),
+  #            selected = unique(articles$`Frequency of feedback`)
+  #          )
+  #   ),
+  #   column(2,
+  #          checkboxGroupInput(
+  #            inputId = "Communication",
+  #            label = "Communication",
+  #            choices = unique(articles$Communication),
+  #            selected = unique(articles$Communication)
+  #          )
+  #   ),
+  #   column(2,
+  #          checkboxGroupInput(
+  #            inputId = "Behaviors",
+  #            label = "Behaviors",
+  #            choices = unique(articles$Behaviors),
+  #            selected = unique(articles$Behaviors)
+  #          )
+  #   )
+  # ),
+  # fluidRow(
+  #   column(2,
+  #          checkboxGroupInput(
+  #            inputId = "Outcome",
+  #            label = "Outcome",
+  #            choices = unique(articles$Outcome),
+  #            selected = unique(articles$Outcome)
+  #          )
+  #   )
+  # ),
+  # fluidRow(
+  #   actionButton("refresh", "Refresh Plot")
+  # ),
+  # fluidRow(
+  #   plotOutput("sankey"),
+  #   downloadButton("download", "Download Filtered Data")
+  # )
 )
 
 
