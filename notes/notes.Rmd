@@ -39,3 +39,6 @@ Cool input method for maybe deciding which columns to plot and in what order on 
 
 - https://rstudio.github.io/sortable/
 - (not all orders make sense though)
+
+Nice dashboard UI.  Could put `selectizeInput()` filters in dropdown menus using `dashboardHeader()`
+- https://rinterface.github.io/shinydashboardPlus/reference/dashboardHeader.html
