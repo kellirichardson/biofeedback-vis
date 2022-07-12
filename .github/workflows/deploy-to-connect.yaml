@@ -1,0 +1,48 @@
+# Workflow derived from https://solutions.rstudio.com/data-science-admin/deploy/github-actions/
+# Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
+on:
+  push:
+    branches:
+      - main
+
+name: deploy-to-connect
+
+jobs:
+  deploy-to-connect:
+    runs-on: macOS-latest
+    env:
+      APP_NAME: "biofeedback_sankey"
+      APP_DIR: "app"
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      RSCONNECT_URL: ${{ secrets.RSCONNECT_URL }}
+      RSCONNECT_APIKEY: ${{ secrets.RSCONNECT_APIKEY }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: r-lib/actions/setup-r@master
+
+      - name: Install renv
+        run: |
+          install.packages("renv")
+        shell: Rscript {0}
+
+      - name: Restore environment
+        run: |
+          renv::consent(TRUE)
+          renv::restore()
+        shell: Rscript {0}
+
+      - name: Generate manifest.json
+        run: |
+          rsconnect::writeManifest(appDir = "${{ env.APP_DIR }}")
+        shell: Rscript {0}
+
+      - name: Deploy to RStudio Connect
+        uses: rstudio/actions/connect-publish@main
+        with:
+          url: https://${{ env.RSCONNECT_APIKEY }}@${{ env.RSCONNECT_URL }}
+          access-type: logged_in
+          show-logs: true
+          force: true
+          dir: ${{ env.APP_DIR }}
+          require-vanity-path: true
