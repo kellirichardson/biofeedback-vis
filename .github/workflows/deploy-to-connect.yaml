@@ -16,21 +16,25 @@ jobs:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       RSCONNECT_URL: ${{ secrets.RSCONNECT_URL }}
       RSCONNECT_APIKEY: ${{ secrets.RSCONNECT_APIKEY }}
+      RENV_PATHS_ROOT: ~/.local/share/renv
     steps:
       - uses: actions/checkout@v2
 
       - uses: r-lib/actions/setup-r@master
 
-      - name: Install renv
-        run: |
-          install.packages("renv")
+      - name: Cache packages
+        uses: actions/cache@v1
+        with:
+          path: ${{ env.RENV_PATHS_ROOT }}
+          key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-renv-
+      
+      - name: Restore packages
         shell: Rscript {0}
-
-      - name: Restore environment
         run: |
-          renv::consent(TRUE)
+          if (!requireNamespace("renv", quietly = TRUE)) install.packages("renv")
           renv::restore()
-        shell: Rscript {0}
 
       - name: Generate manifest.json
         run: |
