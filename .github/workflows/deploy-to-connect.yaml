@@ -48,6 +48,5 @@ jobs:
           access-type: logged_in
           show-logs: true
           force: true
-          dir: ${{ env.APP_DIR }}
-          name: ${{ env.APP_NAME }}
+          dir: ${{ env.APP_DIR }}/:${{ env.APP_NAME }}
           require-vanity-path: true
