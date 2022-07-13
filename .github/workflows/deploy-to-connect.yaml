@@ -49,4 +49,5 @@ jobs:
           show-logs: true
           force: true
           dir: ${{ env.APP_DIR }}
+          name: ${{ env.APP_NAME }}
           require-vanity-path: true
