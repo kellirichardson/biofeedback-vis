@@ -2,7 +2,8 @@ library(shiny)
 library(tidyverse)
 library(ggsankey)
 
-articles  <- read_csv("data/articles_clean.csv")
+
+articles  <- read_csv("articles_clean.csv")
 
 # UI ----------------------------------------------------------------------
 
