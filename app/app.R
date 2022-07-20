@@ -1,5 +1,6 @@
 library(shiny)
-library(shinyWidgets)
+library(shinyWidgets) #for selectizeGroup widget
+library(shinycssloaders) #for loading indicator
 library(tidyverse)
 library(ggsankey)
 
@@ -33,13 +34,13 @@ ui <- fluidPage(
           behaviors = list(inputId = "behaviors", label = "Behaviors:"),
           outcome = list(inputId = "outcome", label = "Outcome:")
         )
-      ), status = "primary"
-    )
+      ),
+      actionButton("refresh", "Refresh Plot"),
+    ),
   ),
   
   fluidRow(
-    actionButton("refresh", "Refresh Plot"),
-    plotOutput("sankey"),
+    plotOutput("sankey") %>% withSpinner(type = 8),
     downloadButton("download", "Download Filtered Data")
   )
 )
