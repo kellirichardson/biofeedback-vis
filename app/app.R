@@ -2,6 +2,13 @@ library(shiny)
 library(tidyverse)
 library(ggsankey)
 
+#needed for RStudio Connect to work.  Technically these don't need to be loaded
+#here, but they need to be loaded somewhere so `renv` recognizes them as
+#dependencies.
+library(packrat)
+library(rsconnect)
+
+
 
 articles  <- read_csv("articles_clean.csv")
 
@@ -68,74 +75,6 @@ ui <- fluidPage(
       downloadButton("download", "Download Filtered Data")
     )
   )
-  # fluidRow(
-  #   #Filter section.  For now just two sets of checkboxes
-  #   column(2,
-  #          checkboxGroupInput(
-  #            inputId = "Domain",
-  #            label = "Domain",
-  #            choices = unique(articles$Domain),
-  #            selected = unique(articles$Domain)
-  #          )
-  #   ),
-  #   column(2,
-  #          checkboxGroupInput(
-  #            inputId = "Biomeasures",
-  #            label = "Biomeasures",
-  #            choices = unique(articles$Biomeasures),
-  #            selected = unique(articles$Biomeasures)
-  #          ),
-  #   ),
-  #   column(2,
-  #          checkboxGroupInput(
-  #            inputId = "Collection",
-  #            label = "Collection",
-  #            choices = unique(articles$Collection),
-  #            selected = unique(articles$Collection)
-  #          )
-  #   ),
-  #   column(2,
-  #          checkboxGroupInput(
-  #            inputId = "freq_feedback",
-  #            label = "Frequency of feedback",
-  #            choices = unique(articles$`Frequency of feedback`),
-  #            selected = unique(articles$`Frequency of feedback`)
-  #          )
-  #   ),
-  #   column(2,
-  #          checkboxGroupInput(
-  #            inputId = "Communication",
-  #            label = "Communication",
-  #            choices = unique(articles$Communication),
-  #            selected = unique(articles$Communication)
-  #          )
-  #   ),
-  #   column(2,
-  #          checkboxGroupInput(
-  #            inputId = "Behaviors",
-  #            label = "Behaviors",
-  #            choices = unique(articles$Behaviors),
-  #            selected = unique(articles$Behaviors)
-  #          )
-  #   )
-  # ),
-  # fluidRow(
-  #   column(2,
-  #          checkboxGroupInput(
-  #            inputId = "Outcome",
-  #            label = "Outcome",
-  #            choices = unique(articles$Outcome),
-  #            selected = unique(articles$Outcome)
-  #          )
-  #   )
-  # ),
-  # fluidRow(
-  #   actionButton("refresh", "Refresh Plot")
-  # ),
-  # fluidRow(
-  #   plotOutput("sankey"),
-  #   downloadButton("download", "Download Filtered Data")
-  # )
 )
 
 
