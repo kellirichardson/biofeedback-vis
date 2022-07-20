@@ -10,7 +10,7 @@ library(ggsankey)
 
 # Read in data ------------------------------------------------------------
 
-articles_raw <- read_csv("data/Data from 663 articles.csv")
+articles_raw <- read_csv("data_raw/Data from 663 articles.csv")
 
 # Clean data --------------------------------------------------------------
 
