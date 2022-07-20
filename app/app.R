@@ -1,101 +1,63 @@
 library(shiny)
+library(shinyWidgets) #for selectizeGroup widget
+library(shinycssloaders) #for loading indicator
 library(tidyverse)
 library(ggsankey)
 
-#needed for RStudio Connect to work.  Technically these don't need to be loaded
-#here, but they need to be loaded somewhere so `renv` recognizes them as
-#dependencies.
+# needed for RStudio Connect to work.  Technically these packages don't need to
+# be loaded here, but they need to be loaded somewhere so `renv` recognizes them
+# as dependencies.
 library(packrat)
 library(rsconnect)
 
 
-
+# RStudio Connect runs relative to app/
 articles  <- read_csv("articles_clean.csv")
+
+# But for development:
+# articles  <- read_csv("app/articles_clean.csv")
+
 
 # UI ----------------------------------------------------------------------
 
 ui <- fluidPage(
-  sidebarLayout(
-    sidebarPanel(
-      width = 3,
-
-      selectizeInput(
-        inputId = "Domain",
-        label = "Domain",
-        choices = unique(articles$Domain),
-        selected = unique(articles$Domain),
-        multiple = TRUE
+  fluidRow(
+    panel(
+      selectizeGroupUI(
+        id = "my-filters",
+        params = list(
+          domain = list(inputId = "domain", label = "Domain:"),
+          biomeasures = list(inputId = "biomeasures", label = "Biomeasures:"),
+          collection = list(inputId = "collection", label = "Collection:"),
+          feedback_freq = list(inputId = "feedback_freq", label = "Frequency of Feedback:"),
+          communication = list(inputId = "communication", label = "Communication:"),
+          behaviors = list(inputId = "behaviors", label = "Behaviors:"),
+          outcome = list(inputId = "outcome", label = "Outcome:")
+        )
       ),
-      selectizeInput(
-        inputId = "Biomeasures",
-        label = "Biomeasures",
-        choices = unique(articles$Biomeasures),
-        selected = unique(articles$Biomeasures),
-        multiple = TRUE
-      ),
-      selectizeInput(
-        inputId = "Collection",
-        label = "Collection",
-        choices = unique(articles$Collection),
-        selected = unique(articles$Collection),
-        multiple = TRUE
-      ),
-      selectizeInput(
-        inputId = "freq_feedback",
-        label = "Frequency of feedback",
-        choices = unique(articles$`Frequency of feedback`),
-        selected = unique(articles$`Frequency of feedback`),
-        multiple = TRUE
-      ),
-      selectizeInput(
-        inputId = "Communication",
-        label = "Communication",
-        choices = unique(articles$Communication),
-        selected = unique(articles$Communication),
-        multiple = TRUE
-      ),
-      selectizeInput(
-        inputId = "Behaviors",
-        label = "Behaviors",
-        choices = unique(articles$Behaviors),
-        selected = unique(articles$Behaviors),
-        multiple = TRUE
-      ),
-      selectizeInput(
-        inputId = "Outcome",
-        label = "Outcome",
-        choices = unique(articles$Outcome),
-        selected = unique(articles$Outcome),
-        multiple = TRUE
-      )
-    ),
-    mainPanel(
       actionButton("refresh", "Refresh Plot"),
-      plotOutput("sankey"),
-      downloadButton("download", "Download Filtered Data")
-    )
+    ),
+  ),
+  
+  fluidRow(
+    plotOutput("sankey") %>% withSpinner(type = 8),
+    downloadButton("download", "Download Filtered Data")
   )
 )
-
 
 # Server ------------------------------------------------------------------
 
 server <- function(input, output, session) {
   
-  #reactive expression to filter data based on checkbox input
-  sankey_data <- reactive({
-    articles %>%
-      filter(
-        Domain %in% input$Domain,
-        Biomeasures %in% input$Biomeasures,
-        Collection %in% input$Collection,
-        `Frequency of feedback` %in% input$freq_feedback,
-        Communication %in% input$Communication,
-        Behaviors %in% input$Behaviors,
-        Outcome %in% input$Outcome
-      ) 
-  })
+  sankey_data <- callModule(
+    module = selectizeGroupServer,
+    id = "my-filters",
+    data = articles,
+    vars = c("domain", "biomeasures", "collection", "outcome", 
+             "feedback_freq", "communication", "behaviors", "outcome")
+  )
   
+
   #render the plot
   output$sankey <- renderPlot({
     #Take a dependency on the refresh button
@@ -108,13 +70,13 @@ server <- function(input, output, session) {
     #up sticking with ggplot
     plotdf <- isolate(sankey_data()) %>% 
       ggsankey::make_long(
-        Domain,
-        Biomeasures,
-        Collection,
-        `Frequency of feedback`,
-        Communication,
-        Behaviors,
-        Outcome
+        domain,
+        biomeasures,
+        collection,
+        feedback_freq,
+        communication,
+        behaviors,
+        outcome
       )
     
     ggplot(plotdf,
@@ -126,13 +88,20 @@ server <- function(input, output, session) {
                label = node)) +
       geom_sankey(flow.alpha = 0.5) +
       geom_sankey_label(size = 3.5, fill = "white") +
+      scale_x_discrete(
+        labels = c("Domain", "Biomeasures", "Collection",
+                   "Frequency of Feedback", "Communication",
+                   "Behaviors", "Outcome")
+      ) +
       theme_sankey(base_size = 16) + 
       theme(legend.position = "none") + 
       xlab(NULL)
   })
   
+  # download button function
   output$download <- downloadHandler(
     filename = function() {
+      #constructs file name based on today's date
       paste('data-', Sys.Date(), '.csv', sep='')
     },
     content = function(file) {
