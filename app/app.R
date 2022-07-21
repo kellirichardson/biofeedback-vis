@@ -4,12 +4,6 @@ library(shinycssloaders) #for loading indicator
 library(tidyverse)
 library(ggsankey)
 
-# needed for RStudio Connect to work.  Technically these packages don't need to
-# be loaded here, but they need to be loaded somewhere so `renv` recognizes them
-# as dependencies.
-library(packrat)
-library(rsconnect)
-
 
 # RStudio Connect runs relative to app/
 articles  <- read_csv("articles_clean.csv")
