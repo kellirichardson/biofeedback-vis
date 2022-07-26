@@ -37,7 +37,12 @@ ui <- fluidPage(
   ),
   
   fluidRow(
-    plotOutput("sankey") %>% withSpinner(type = 8),
+    plotOutput(
+      "sankey",
+      width = "100%", #span entire page
+      height = "600px" #adjust height here
+    ) %>%
+      withSpinner(type = 8), #loading indicator for plot
     downloadButton("download", "Download Filtered Data")
   )
 )
