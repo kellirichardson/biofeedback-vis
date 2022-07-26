@@ -26,8 +26,6 @@ articles <-
   #replace anything that starts with "Other : " with "Other" to lump categories
   mutate(across(c(Biomeasures, Behaviors), ~if_else(str_detect(., "^Other : "), "Other", .)))
 
-write_csv(articles, "app/articles_clean.csv")
-
 # Plot ---------------------------------------------------------
 
 Sankey <- 
