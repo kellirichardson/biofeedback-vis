@@ -26,8 +26,6 @@ articles <-
   #replace anything that starts with "Other : " with "Other" to lump categories
   mutate(across(c(Biomeasures, Behaviors), ~if_else(str_detect(., "^Other : "), "Other", .)))
 
-write_csv(articles, "app/articles_clean.csv")
-
 # Plot ---------------------------------------------------------
 
 Sankey <- 
@@ -44,8 +42,22 @@ test_sankey_full <-
                      next_node = next_node,
                      fill = factor(node),
                      label = node)) +
-  geom_sankey(flow.alpha = 0.5) +
-  geom_sankey_label(size = 3.5, fill = "white") +
+  geom_sankey(
+    flow.alpha = 0.5,
+    node.color = "gray30", #color of node outline
+    width = 0.1 #node width
+    ) +
+  
+  #appears to accept args passed to geom_label()
+  geom_sankey_label(
+    size = 3.5,
+    fill = "white",
+    color = "darkblue", #outline and text color
+    family = "Avenir", #sets label font
+    label.padding = unit(0.2, "lines"), #padding between text and label outline
+    label.size = 0.2, #thickness of line around label
+    label.r = unit(0.1, "lines") #roundness of labels
+  ) +
   theme_sankey(base_size = 16) + 
   theme(legend.position = "none") + 
   xlab(NULL)

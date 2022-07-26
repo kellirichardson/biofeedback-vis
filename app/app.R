@@ -37,7 +37,12 @@ ui <- fluidPage(
   ),
   
   fluidRow(
-    plotOutput("sankey") %>% withSpinner(type = 8),
+    plotOutput(
+      "sankey",
+      width = "100%", #span entire page
+      height = "600px" #adjust height here
+    ) %>%
+      withSpinner(type = 8), #loading indicator for plot
     downloadButton("download", "Download Filtered Data")
   )
 )
@@ -83,8 +88,22 @@ server <- function(input, output, session) {
                next_node = next_node,
                fill = factor(node),
                label = node)) +
-      geom_sankey(flow.alpha = 0.5) +
-      geom_sankey_label(size = 3.5, fill = "white") +
+      geom_sankey(
+        flow.alpha = 0.5,
+        node.color = "gray30", #color of node outline
+        width = 0.1 #node width
+      ) +
+      geom_sankey_label(
+        size = 3.5,
+        fill = "white",
+        color = "darkblue", #outline and text color
+        family = "Arial", #set label font
+        label.padding = unit(0.2, "lines"), #padding between text and label outline
+        label.size = 0.2, #thickness of line around label
+        label.r = unit(0.1, "lines") #roundness of label corners
+      ) +
+      
+      #set x-axis labels manually
       scale_x_discrete(
         labels = c("Domain", "Biomeasures", "Collection",
                    "Frequency of Feedback", "Communication",
