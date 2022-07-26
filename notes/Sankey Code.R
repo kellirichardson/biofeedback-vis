@@ -44,6 +44,7 @@ test_sankey_full <-
                      label = node)) +
   geom_sankey(
     flow.alpha = 0.5,
+    node.color = "gray30", #color of node outline
     width = 0.1 #node width
     ) +
   

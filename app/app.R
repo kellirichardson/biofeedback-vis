@@ -89,7 +89,9 @@ server <- function(input, output, session) {
                fill = factor(node),
                label = node)) +
       geom_sankey(
-        flow.alpha = 0.5
+        flow.alpha = 0.5,
+        node.color = "gray30", #color of node outline
+        width = 0.1 #node width
       ) +
       geom_sankey_label(
         size = 3.5,
