@@ -76,7 +76,8 @@ test_sankey_full
 Sankey_sub <- 
   articles %>%
   filter(Biomeasures %in% c("Glucose", "Carcinomas")) %>% 
-  make_long(Domain, Biomeasures, Collection, 'Frequency of feedback', Communication, Behaviors, Outcome)
+  make_long(Domain, Biomeasures, Collection, 'Frequency of feedback', Communication, Behaviors, Outcome) %>% 
+  mutate(across(everything(), as.factor))
 
 test_sankey_sub <-
   ggplot(Sankey_sub, aes(x = x, 
@@ -92,3 +93,82 @@ test_sankey_sub <-
   xlab(NULL)
 
 test_sankey_sub
+
+
+
+# Highlighting --------------------------------------------------------------
+
+#' We want to be able to render nodes that will be removed when the plot is
+#' re-drawn as greyed out. 
+#' 
+#' Ok, let's start with a filtered version of articles
+#' as our test data
+
+full_data <- articles %>% filter(Domain == "Diabetes")
+full_data_sankey <- make_long(full_data, Domain, Biomeasures, Collection, 'Frequency of feedback', Communication, Behaviors, Outcome)
+p <- 
+  ggplot(full_data_sankey,
+       aes(x = x, 
+           next_x = next_x, 
+           node = node, 
+           next_node = next_node,
+           fill = factor(node),
+           label = node)) +
+  geom_sankey() +
+  geom_sankey_label() +
+  theme(legend.position = "none")
+p
+
+#' Let's say we want to filter out "Device" from the Communication step.
+#' 
+
+step_rm <- "Communication"
+node_rm <- "Device"
+
+#' Before plotting the filtered plot, we want to grey out any nodes connected to
+#' "Device" in .  To do this, we need to 1) figure out what nodes are to
+#' the left of Self-measurement (flows to the right will get greyed out with
+#' Self-measurment as they take on the same fill) and 2) replace that color with
+#' grey in the scale.
+#' 
+#' Let's start by making a manual scale that we can edit
+
+nodes <- unique(c(full_data_sankey$node, full_data_sankey$next_node))
+colors <- colorspace::qualitative_hcl(n = length(nodes))
+names(colors) <- nodes
+
+p + scale_fill_manual(values = colors)
+
+#' Now, figure out what node is connected to self-measurment
+#' 
+connections_df <- 
+  full_data_sankey %>% 
+  filter(
+    next_x == step_rm,
+    node == node_rm |
+      next_node == node_rm
+  )
+
+# Now we set those colors to grey
+
+to_grey <- unique(c(connections_df$node, connections_df$next_node))
+to_grey
+
+colors_greyed <- colors
+
+colors_greyed[names(colors_greyed) %in% to_grey] <- "grey50"
+
+# If we only want to grey out flows coming out of "Device" then it's easier:
+
+colors_greyed2 <- colors
+colors_greyed2[names(colors_greyed2) %in% node_rm] <- "grey50"
+
+
+#now plot with greyed out
+
+p + scale_fill_manual(values = colors_greyed)
+p + scale_fill_manual(values = colors_greyed2)
+
+
+# So the problem here is that "Other" shows up in multiple steps and they all
+# get greyed out.  Otherwise this would work.  A possible work-around is to give the "other"s unique names.
