@@ -5,8 +5,8 @@ library(tidyverse)
 library(ggsankey)
 
 # Options to make the plot look less aliased on rsconnect
-library(Cairo)
-options(shiny.usecairo = TRUE)
+#library(Cairo)
+#options(shiny.usecairo = TRUE)
 
 # RStudio Connect runs relative to app/
 articles  <- read_csv("articles_clean.csv")
@@ -89,19 +89,20 @@ server <- function(input, output, session) {
                fill = factor(node),
                label = node)) +
       geom_sankey(
-        flow.alpha = 0.5,
-        node.color = "gray30", #color of node outline
-        width = 0.1 #node width
+        flow.alpha = 0.8,
+        node.color = "white", #color of node outline
+        width = 0.0 #node width
       ) +
-      geom_sankey_label(
+      geom_sankey_label( #add nudge_y = 
         size = 3.5,
         fill = "white",
         color = "darkblue", #outline and text color
         family = "Arial", #set label font
         label.padding = unit(0.2, "lines"), #padding between text and label outline
-        label.size = 0.2, #thickness of line around label
-        label.r = unit(0.1, "lines") #roundness of label corners
+        label.size = 0.1, #thickness of line around label
+        label.r = unit(0.0, "lines") #roundness of label corners
       ) +
+      scale_fill_viridis_d() +
       
       #set x-axis labels manually
       scale_x_discrete(
