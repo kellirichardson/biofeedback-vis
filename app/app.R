@@ -96,7 +96,7 @@ server <- function(input, output, session) {
       geom_sankey_label(
         size = 3.5,
         fill = "white",
-        color = "darkblue", #outline and text color
+        color = "black", #outline and text color
         family = "Arial", #set label font
         label.padding = unit(0.2, "lines"), #padding between text and label outline
         label.size = 0.2, #thickness of line around label
