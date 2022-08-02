@@ -5,8 +5,8 @@ library(tidyverse)
 library(ggsankey)
 
 # Options to make the plot look less aliased on rsconnect
-library(Cairo)
-options(shiny.usecairo = TRUE)
+#library(Cairo)
+#options(shiny.usecairo = TRUE)
 
 # RStudio Connect runs relative to app/
 articles  <- read_csv("articles_clean.csv")
@@ -93,16 +93,17 @@ server <- function(input, output, session) {
         node.color = "white", #color of node outline
         width = 0.0 #node width
       ) +
-      geom_sankey_label( #add nudge_y = 
+      geom_sankey_label(  
         size = 3.5,
         fill = "white",
         color = "darkblue", #outline and text color
         family = "Arial", #set label font
         label.padding = unit(0.2, "lines"), #padding between text and label outline
         label.size = 0.1, #thickness of line around label
-        label.r = unit(0.0, "lines") #roundness of label corners
+        label.r = unit(0.0, "lines"), #roundness of label corners
+        nudge_y = 2 #error - ignoring
       ) +
-      scale_fill_viridis_d() +
+      scale_fill_brewer(palette = "Set3") + #error - too many n. How do we get it to repeat colours?
       
       #set x-axis labels manually
       scale_x_discrete(
