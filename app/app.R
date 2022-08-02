@@ -5,8 +5,8 @@ library(tidyverse)
 library(ggsankey)
 
 # Options to make the plot look less aliased on rsconnect
-#library(Cairo)
-#options(shiny.usecairo = TRUE)
+library(Cairo)
+options(shiny.usecairo = TRUE)
 
 # RStudio Connect runs relative to app/
 articles  <- read_csv("articles_clean.csv")
