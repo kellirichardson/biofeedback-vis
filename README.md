@@ -9,7 +9,6 @@ The goal of biofeedback-vis is to ...
 
 [Shiny App](https://viz.datascience.arizona.edu/biofeedback_sankey/)
 
-[Notes](notes/notes.md)
 
 ## Collaboration Guidelines
 
@@ -17,18 +16,13 @@ This project uses [`renv`](https://rstudio.github.io/renv/articles/renv.html) fo
 
 To contribute to this project, please create a new branch for your changes and make a pull request.  One easy way to do this from within R is with the `usethis` package and the `pr_*` functions.  `pr_init("branch-name")` begins a new branch locally, `pr_push()` helps you create a new pull request, and after it is merged you can use `pr_finish()` to clean things up.  More about this workflow [here](https://usethis.r-lib.org/articles/pr-functions.html).
 
-## Repo structure
+## How it works
 
-`.github/` houses the GitHub action YAML file that controls how the Shiny app is automatically deployed to RStudio Connect.  This shouldn't need to be edited other than maybe to change the name/URL of the app.
+- The raw data output from <!--I can't remember the name of the software! --> is in the `data_raw` folder.  
+- An R script in the `R` folder has code to wrangle those data and save the result as `articles_clean.csv` in the `app` folder. If the raw data changes, this script will need to be re-run manually!
+- The Shiny app code is in `app/app.R` and is made of two parts---a UI, which defines the look of the app and what inputs and outputs are shown, and a server that handles the data and plotting.
+- The packages needed to wrangle the data and run the Shiny app are kept track of by the `renv` package.  If you add new packages or update packages, you can run `renv::snapshot()` to record this. `.Rprofile`, `renv.lock`, and the `renv` folder are all needed for `renv` to work and should not be edited manually.
+- When changes are made to the app through a GitHub pull request, it triggers a GitHub action to run automatically to deploy the Shiny app to viz.datascience.arizona.edu.  This action is defined in `.github/workflows/deploy-to-connect.yaml` and probably never needs to be edited.
 
-`.Rprofile`, `renv.lock`, and `renv/` are all infrastructure added by the `renv` package and should not be edited manually.
-
-`app/` contains the files for the Shiny App, including the cleaned and wrangled data.
-
-`data_raw/` contains the raw exported CSV file.
-
-`notes/` contains notes and early drafts of code.
-
-`R/` contains R scripts to be run to wrangle the raw data.
 
 

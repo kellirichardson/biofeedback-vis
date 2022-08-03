@@ -11,8 +11,8 @@ jobs:
   deploy-to-connect:
     runs-on: macOS-latest
     env:
-      APP_NAME: "biofeedback_sankey"
-      APP_DIR: "app"
+      APP_NAME: "biofeedback_sankey"  #edit this if you want to change the custom URL of the app
+      APP_DIR: "app"  #edit this only if you change the name of the folder the Shiny R script is in
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       RSCONNECT_URL: ${{ secrets.RSCONNECT_URL }}
       RSCONNECT_APIKEY: ${{ secrets.RSCONNECT_APIKEY }}
