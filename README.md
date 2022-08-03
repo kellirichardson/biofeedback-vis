@@ -18,7 +18,7 @@ To contribute to this project, please create a new branch for your changes and m
 
 ## How it works
 
-- The raw data output from <!--I can't remember the name of the software! --> is in the `data_raw` folder.  
+- The csv file output by DistillerSR is in the `data_raw` folder.
 - An R script in the `R` folder has code to wrangle those data and save the result as `articles_clean.csv` in the `app` folder. If the raw data changes, this script will need to be re-run manually!
 - The Shiny app code is in `app/app.R` and is made of two parts---a UI, which defines the look of the app and what inputs and outputs are shown, and a server that handles the data and plotting.
 - The packages needed to wrangle the data and run the Shiny app are kept track of by the `renv` package.  If you add new packages or update packages, you can run `renv::snapshot()` to record this. `.Rprofile`, `renv.lock`, and the `renv` folder are all needed for `renv` to work and should not be edited manually.
