@@ -8,7 +8,7 @@ library(janitor)
 articles_raw <- read_csv("data_raw/Scoping.csv")
 
 # Clean data --------------------------------------------------------------
-View(articles_raw %>% clean_names())
+
 articles <-
   articles_raw %>%
   clean_names() %>% #make column names programming-friendly
