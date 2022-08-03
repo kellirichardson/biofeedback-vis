@@ -1,0 +1,69 @@
+library(networkD3)
+library(readr)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(ggsankey)
+
+#### Example from R Graph Gallery ####
+URL <- "https://cdn.rawgit.com/christophergandrud/networkD3/master/JSONdata/energy.json"
+Energy <- jsonlite::fromJSON(URL)
+
+
+head(Energy$links)
+head(Energy$nodes)
+
+
+p <- sankeyNetwork(Links = Energy$links, Nodes = Energy$nodes, Source = "source",
+                   Target = "target", Value = "value", NodeID = "name",
+                   units = "TWh", fontSize = 12, nodeWidth = 30)
+p
+
+
+#### Test with biofeedback dataset ####
+
+# Read in
+articles_raw <- read_csv("data_raw/Data from 663 articles.csv")
+
+# Clean
+articles <-
+  articles_raw %>%
+  rename(Biomeasures = `Biological measures`) %>% 
+  #separate by commas, but only ones that don't have a space after them to keep the "Other : " sentences together
+  separate_rows(Communication, sep = ",(?!\\s)") %>% 
+  separate_rows(Biomeasures, sep = ",(?!\\s)") %>%
+  separate_rows(Behaviors, sep = ",(?!\\s)") %>% 
+  separate_rows(Collection, sep = ",(?!\\s)") %>%
+  separate_rows('Frequency of feedback', sep = ",(?!\\s)") %>%
+  #replace anything that starts with "Other : " with "Other" to lump categories
+  mutate(across(c(Biomeasures, Behaviors), ~if_else(str_detect(., "^Other : "), "Other", .)))
+
+# Use ggsankey::make_long()
+Sankey <- articles %>%
+  make_long(Domain, Biomeasures, Collection, 'Frequency of feedback', Communication, Behaviors, Outcome)
+
+# Count number of observations for each link
+results_n <- Sankey %>%
+  group_by(node, next_node) %>%
+  count()
+
+# Create nodes dataframe, must be zero-indexed
+types <- unique(as.character(results_n$node))
+nodes <- data.frame(node = seq(from = 0, length.out = length(types)),
+                    name = types)
+
+# Create links dataframe
+links <- left_join(results_n, nodes, by = c("node" = "name")) %>%
+  left_join(nodes, by = c("next_node" = "name")) %>%
+  ungroup() %>%
+  rename(source = node.y,
+         target = node.y.y,
+         value = n) %>%
+  select(source, target, value) %>%
+  na.omit() %>%
+  as.data.frame()
+
+# Plot 
+sankeyNetwork(Links = links, Nodes = nodes, Source = 'source', 
+              Target = 'target', Value = 'value', NodeID = 'name',
+              units = 'observations')
