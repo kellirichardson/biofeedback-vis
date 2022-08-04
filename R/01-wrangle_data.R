@@ -5,7 +5,6 @@ library(janitor)
 
 # Read in data ------------------------------------------------------------
 articles_raw <- read_csv("data_raw/Scoping.csv")
-names(articles_raw)
 
 # Clean data --------------------------------------------------------------
 
