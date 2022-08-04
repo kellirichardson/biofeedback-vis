@@ -4,14 +4,15 @@ library(tidyverse)
 library(janitor)
 
 # Read in data ------------------------------------------------------------
-
 articles_raw <- read_csv("data_raw/Scoping.csv")
+names(articles_raw)
 
 # Clean data --------------------------------------------------------------
 
 articles <-
   articles_raw %>%
   clean_names() %>% #make column names programming-friendly
+  rename(biomarker = "biological_measures") %>% 
   
   # Next, separate by commas, but only ones that don't have a space after them to
   # keep the "Other : " sentences together.  The ",(?!\\s)" is a "regular
