@@ -41,6 +41,8 @@ jobs:
         run: |
           if (!requireNamespace("packrat", quietly = TRUE)) install.packages("packrat")
           if (!requireNamespace("rsconnect", quietly = TRUE)) install.packages("rsconnect")
+          if (!requireNamespace("Cairo", quietly = TRUE)) install.packages("Cairo")
+          options(shiny.usecairo = TRUE) #to fix bad aliasing in plots
           
       - name: Generate manifest.json
         run: |
