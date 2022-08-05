@@ -51,7 +51,7 @@ server <- function(input, output, session) {
     module = selectizeGroupServer,
     id = "my-filters",
     data = articles,
-    vars = c("domain", "biomarker", "collection", "outcome", 
+    vars = c("domain", "biomarker", "collection", 
              "frequency", "communication", "behavior", "outcome")
   )
   

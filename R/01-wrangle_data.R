@@ -17,11 +17,13 @@ articles <-
   # keep the "Other : " sentences together.  The ",(?!\\s)" is a "regular
   # expression" or "regex" that basically says "look for a comma that doesn't
   # have a space of any kind after it".
+  separate_rows(domain, sep = ",(?!\\s)") %>% 
   separate_rows(communication, sep = ",(?!\\s)") %>% 
   separate_rows(biomarker, sep = ",(?!\\s)") %>%
   separate_rows(behavior, sep = ",(?!\\s)") %>% 
   separate_rows(collection, sep = ",(?!\\s)") %>%
   separate_rows(frequency, sep = ",(?!\\s)") %>%
+  separate_rows(outcome, sep = ",(?!\\s)") %>% 
   
   # Now replace anything that starts with "Other : " with "Other" to lump
   # categories (the "^" is another bit of regex that just says this has to be at
