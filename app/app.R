@@ -3,13 +3,15 @@ library(shinyWidgets) #for selectizeGroup widget
 library(shinycssloaders) #for loading indicator
 library(tidyverse)
 library(ggsankey)
-
-# Options to make the plot look less aliased on rsconnect
-library(Cairo)
-options(shiny.usecairo = TRUE)
+library(networkD3)
+library(htmlwidgets)
 
 # RStudio Connect runs relative to app/
-articles  <- read_csv("articles_clean.csv")
+articles  <- read_csv("articles_clean.csv") %>%
+  mutate(biomeasures = if_else(biomeasures == "Other", "Other biomeasures", biomeasures),
+         collection = if_else(collection == "Other", "Other collection types", collection),
+         behaviors = if_else(behaviors == "Other", "Other behaviors", behaviors),
+         outcome = if_else(outcome == "Other", "Other outcomes", outcome))
 
 # But for development:
 # articles  <- read_csv("app/articles_clean.csv")
@@ -37,7 +39,7 @@ ui <- fluidPage(
   ),
   
   fluidRow(
-    plotOutput(
+    sankeyNetworkOutput(
       "sankey",
       width = "100%", #span entire page
       height = "600px" #adjust height here
@@ -61,7 +63,7 @@ server <- function(input, output, session) {
   
 
   #render the plot
-  output$sankey <- renderPlot({
+  output$sankey <- renderSankeyNetwork({
     #Take a dependency on the refresh button
     input$refresh
     
@@ -70,7 +72,7 @@ server <- function(input, output, session) {
     #could still update highlighting with every change by using sankey_data() in
     #a scale_color* call possibly.  Worry about this later in case we don't end
     #up sticking with ggplot
-    plotdf <- isolate(sankey_data()) %>% 
+    longdf <- isolate(sankey_data()) %>% 
       ggsankey::make_long(
         domain,
         biomeasures,
@@ -78,40 +80,68 @@ server <- function(input, output, session) {
         feedback_freq,
         communication,
         behaviors,
-        outcome
+        outcome,
+        value = refid
       )
     
-    ggplot(plotdf,
-           aes(x = x, 
-               next_x = next_x, 
-               node = node, 
-               next_node = next_node,
-               fill = factor(node),
-               label = node)) +
-      geom_sankey(
-        flow.alpha = 0.5,
-        node.color = "gray30", #color of node outline
-        width = 0.1 #node width
-      ) +
-      geom_sankey_label(
-        size = 3.5,
-        fill = "white",
-        color = "darkblue", #outline and text color
-        family = "Arial", #set label font
-        label.padding = unit(0.2, "lines"), #padding between text and label outline
-        label.size = 0.2, #thickness of line around label
-        label.r = unit(0.1, "lines") #roundness of label corners
-      ) +
-      
-      #set x-axis labels manually
-      scale_x_discrete(
-        labels = c("Domain", "Biomeasures", "Collection",
-                   "Frequency of Feedback", "Communication",
-                   "Behaviors", "Outcome")
-      ) +
-      theme_sankey(base_size = 16) + 
-      theme(legend.position = "none") + 
-      xlab(NULL)
+    # Count observations for each set of links
+    results_n <- longdf %>%
+      group_by(node, next_node) %>%
+      summarize(n = n(), 
+                n_refs = length(unique(value)))
+    
+    # Create zero-indexed dataframe of nodes
+    types <- unique(as.character(results_n$node))
+    
+    # Function to count # of refs per node
+    count_ref <- function(x) {
+      temp <- sankey_data() %>%
+        filter_all(any_vars(grepl(x, .)))
+      return(length(unique(temp$refid)))
+    }
+    N_REFS <- sapply(types, count_ref)
+    
+    nodes <- data.frame(node = seq(from = 0, length.out = length(types)),
+                        name = types,
+                        N_REFS = N_REFS)
+
+    # Join together for links table, omit NA
+    links <- left_join(results_n, nodes, by = c("node" = "name")) %>%
+      left_join(nodes, by = c("next_node" = "name")) %>%
+      ungroup() %>%
+      rename(source = node.y,
+             target = node.y.y,
+             value = n) %>%
+      select(source, target, value, n_refs) %>%
+      na.omit() %>%
+      as.data.frame()
+    
+    # Sankey network
+    sn <- sankeyNetwork(Links = links, Nodes = nodes, Source = 'source', 
+                  Target = 'target', Value = 'value', NodeID = 'name',
+                  units = 'observations')
+    
+    # Add n_refs back into the nodes data that sankeyNetwork strips out
+    sn$x$nodes$N_REFS <- nodes$N_REFS
+    sn$x$links$n_refs <- links$n_refs
+    
+    # Modify font size
+    sn$x$options$fontSize <- 10
+    sn$x$options$fontFamily <- "Arial"
+    
+    # Add onRender JavaScript to set title to value of state
+    sn <- htmlwidgets::onRender(
+      sn,
+      '
+            function(el, x) {
+                d3.selectAll(".node").select("title foreignObject body pre")
+                .text(function(d) { return d.N_REFS; });
+            }
+            '
+    )
+    
+    # return the result
+    sn
   })
   
   # download button function
