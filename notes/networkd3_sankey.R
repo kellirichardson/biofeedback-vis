@@ -36,16 +36,22 @@ articles <-
   separate_rows(Collection, sep = ",(?!\\s)") %>%
   separate_rows('Frequency of feedback', sep = ",(?!\\s)") %>%
   #replace anything that starts with "Other : " with "Other" to lump categories
-  mutate(across(c(Biomeasures, Behaviors), ~if_else(str_detect(., "^Other : "), "Other", .)))
+  mutate(across(c(Biomeasures, Behaviors), ~if_else(str_detect(., "^Other : "), "Other", .)),
+         Biomeasures = if_else(Biomeasures == "Other", "Other biomeasures", Biomeasures),
+         Collection = if_else(Collection == "Other", "Other collection types", Collection),
+         Behaviors = if_else(Behaviors == "Other", "Other behaviors", Behaviors),
+         Outcome = if_else(Outcome == "Other", "Other outcomes", Outcome))
 
 # Use ggsankey::make_long()
 Sankey <- articles %>%
-  make_long(Domain, Biomeasures, Collection, 'Frequency of feedback', Communication, Behaviors, Outcome)
+  make_long(Domain, Biomeasures, Collection, 'Frequency of feedback', Communication, Behaviors, Outcome,
+            value = Refid) # keep Ref ID around for summarizing
 
 # Count number of observations for each link
 results_n <- Sankey %>%
   group_by(node, next_node) %>%
-  count()
+  summarize(n = n(), 
+            n_refs = length(unique(value)))
 
 # Create nodes dataframe, must be zero-indexed
 types <- unique(as.character(results_n$node))
@@ -59,7 +65,7 @@ links <- left_join(results_n, nodes, by = c("node" = "name")) %>%
   rename(source = node.y,
          target = node.y.y,
          value = n) %>%
-  select(source, target, value) %>%
+  select(source, target, value, n_refs) %>%
   na.omit() %>%
   as.data.frame()
 
