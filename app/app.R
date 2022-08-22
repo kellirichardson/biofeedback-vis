@@ -14,8 +14,18 @@ articles  <- read_csv("articles_clean.csv")
 # UI ----------------------------------------------------------------------
 
 ui <- fluidPage(
+  h1("Title"),
+  p("A short description could go here, but probably shouldn't be too long or you'll have to scroll down quite a bit to get to the rest of the app."),
   fluidRow(
     panel(
+      sliderInput(
+        inputId = "year_range",value = c(min(articles$year), max(articles$year)),
+        label = "Year Range",
+        min = min(articles$year),
+        max = max(articles$year),
+        sep = "",
+        dragRange = TRUE
+      ),
       selectizeGroupUI(
         id = "my-filters",
         params = list(
@@ -30,16 +40,6 @@ ui <- fluidPage(
       ),
       actionButton("refresh", "Refresh Plot"),
     ),
-  ),
-  
-  fluidRow(
-    plotOutput(
-      "sankey",
-      width = "100%", #span entire page
-      height = "600px" #adjust height here
-    ) %>%
-      withSpinner(type = 8), #loading indicator for plot
-    downloadButton("download", "Download Filtered Data")
   )
 )
 
@@ -55,7 +55,6 @@ server <- function(input, output, session) {
              "frequency", "communication", "behavior", "outcome")
   )
   
-
   #render the plot
   output$sankey <- renderPlot({
     #Take a dependency on the refresh button
@@ -66,7 +65,10 @@ server <- function(input, output, session) {
     #could still update highlighting with every change by using sankey_data() in
     #a scale_color* call possibly.  Worry about this later in case we don't end
     #up sticking with ggplot
-    plotdf <- isolate(sankey_data()) %>% 
+    plotdf <- isolate(
+      sankey_data() %>% 
+        filter(year >= input$year_range[1] & year <= input$year_range[2])
+    ) %>% 
       ggsankey::make_long(
         domain,
         biomarker,
