@@ -17,6 +17,8 @@ ui <- fluidPage(
   h1("Title"),
   p("A short description could go here, but probably shouldn't be too long or you'll have to scroll down quite a bit to get to the rest of the app."),
   fluidRow(
+
+## Input panel -------------------------------------------------------------
     panel(
       sliderInput(
         inputId = "year_range",value = c(min(articles$year), max(articles$year)),
@@ -40,13 +42,26 @@ ui <- fluidPage(
       ),
       actionButton("refresh", "Refresh Plot"),
     ),
+  ),
+  
+  fluidRow(
+
+## Plot output -------------------------------------------------------------
+    plotOutput(
+      "sankey",
+      width = "100%", #span entire page
+      height = "600px" #adjust height here
+    ) %>%
+      withSpinner(type = 8), #loading indicator for plot
+    downloadButton("download", "Download Filtered Data")
   )
 )
 
 # Server ------------------------------------------------------------------
 
 server <- function(input, output, session) {
-  
+
+# Filter data by selectize input ------------------------------------------
   sankey_data <- callModule(
     module = selectizeGroupServer,
     id = "my-filters",
@@ -55,11 +70,12 @@ server <- function(input, output, session) {
              "frequency", "communication", "behavior", "outcome")
   )
   
-  #render the plot
+# Render the plot --------------------------------------------------------
   output$sankey <- renderPlot({
     #Take a dependency on the refresh button
     input$refresh
-    
+
+## Filter data ------------------------------------------------------------
     #use isolate() so the plot only updates when the button is clicked, not when
     #sankey_data is updated
     #could still update highlighting with every change by using sankey_data() in
@@ -78,7 +94,8 @@ server <- function(input, output, session) {
         behavior,
         outcome
       )
-    
+
+# Build the Plot --------------------------------------------------------
     ggplot(plotdf,
            aes(x = x, 
                next_x = next_x, 
@@ -112,7 +129,7 @@ server <- function(input, output, session) {
       xlab(NULL)
   })
   
-  # download button function
+# Download button function ----------------------
   output$download <- downloadHandler(
     filename = function() {
       #constructs file name based on today's date
