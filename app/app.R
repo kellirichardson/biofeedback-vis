@@ -45,8 +45,6 @@ ui <- fluidPage(
   ),
   
   fluidRow(
-
-## Plot output -------------------------------------------------------------
     plotOutput(
       "sankey",
       width = "100%", #span entire page
@@ -62,13 +60,14 @@ ui <- fluidPage(
 server <- function(input, output, session) {
 
 # Filter data by selectize input ------------------------------------------
-  sankey_data <- callModule(
+  sankey_filtered <- callModule(
     module = selectizeGroupServer,
     id = "my-filters",
     data = articles,
     vars = c("domain", "biomarker", "collection", 
              "frequency", "communication", "behavior", "outcome")
-  )
+  ) 
+
   
 # Render the plot --------------------------------------------------------
   output$sankey <- renderPlot({
@@ -81,10 +80,10 @@ server <- function(input, output, session) {
     #could still update highlighting with every change by using sankey_data() in
     #a scale_color* call possibly.  Worry about this later in case we don't end
     #up sticking with ggplot
-    plotdf <- isolate(
-      sankey_data() %>% 
-        filter(year >= input$year_range[1] & year <= input$year_range[2])
-    ) %>% 
+    sankey_data <- isolate(sankey_filtered() %>% 
+      filter(year >= input$year_range[1] & year <= input$year_range[2]))
+    
+    plotdf <- sankey_data %>% 
       ggsankey::make_long(
         domain,
         biomarker,
@@ -136,7 +135,7 @@ server <- function(input, output, session) {
       paste('data-', Sys.Date(), '.csv', sep='')
     },
     content = function(file) {
-      write.csv(sankey_data(), file)
+      write.csv(sankey_data, file)
     }
   )
 }
