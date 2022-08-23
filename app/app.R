@@ -4,10 +4,6 @@ library(shinycssloaders) #for loading indicator
 library(tidyverse)
 library(ggsankey)
 
-# Options to make the plot look less aliased on rsconnect
-#library(Cairo)
-#options(shiny.usecairo = TRUE)
-
 # RStudio Connect runs relative to app/
 articles  <- read_csv("articles_clean.csv")
 
@@ -24,11 +20,11 @@ ui <- fluidPage(
         id = "my-filters",
         params = list(
           domain = list(inputId = "domain", label = "Domain:"),
-          biomeasures = list(inputId = "biomeasures", label = "Biomeasures:"),
+          biomarker = list(inputId = "biomarker", label = "Biomarkers:"),
           collection = list(inputId = "collection", label = "Collection:"),
-          feedback_freq = list(inputId = "feedback_freq", label = "Frequency of Feedback:"),
+          frequency = list(inputId = "frequency", label = "Frequency of Feedback:"),
           communication = list(inputId = "communication", label = "Communication:"),
-          behaviors = list(inputId = "behaviors", label = "Behaviors:"),
+          behavior = list(inputId = "behavior", label = "Behaviors:"),
           outcome = list(inputId = "outcome", label = "Outcome:")
         )
       ),
@@ -55,8 +51,8 @@ server <- function(input, output, session) {
     module = selectizeGroupServer,
     id = "my-filters",
     data = articles,
-    vars = c("domain", "biomeasures", "collection", "outcome", 
-             "feedback_freq", "communication", "behaviors", "outcome")
+    vars = c("domain", "biomarker", "collection", 
+             "frequency", "communication", "behavior", "outcome")
   )
   
 
@@ -73,11 +69,11 @@ server <- function(input, output, session) {
     plotdf <- isolate(sankey_data()) %>% 
       ggsankey::make_long(
         domain,
-        biomeasures,
+        biomarker,
         collection,
-        feedback_freq,
+        frequency,
         communication,
-        behaviors,
+        behavior,
         outcome
       )
     
@@ -107,7 +103,7 @@ server <- function(input, output, session) {
       
       #set x-axis labels manually
       scale_x_discrete(
-        labels = c("Domain", "Biomeasures", "Collection",
+        labels = c("Domain", "Biomarkers", "Collection",
                    "Frequency of Feedback", "Communication",
                    "Behaviors", "Outcome")
       ) +

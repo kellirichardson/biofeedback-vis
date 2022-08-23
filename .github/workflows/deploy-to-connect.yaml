@@ -1,4 +1,6 @@
-# Workflow derived from https://solutions.rstudio.com/data-science-admin/deploy/github-actions/
+# This action was derived from two main sources:
+# 1) https://solutions.rstudio.com/data-science-admin/deploy/github-actions/ 
+# 2) https://rstudio.github.io/renv/articles/ci.html
 # Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
 on:
   push:
@@ -11,8 +13,8 @@ jobs:
   deploy-to-connect:
     runs-on: macOS-latest
     env:
-      APP_NAME: "biofeedback_sankey"
-      APP_DIR: "app"
+      APP_NAME: "biofeedback_sankey"  #edit this if you want to change the custom URL of the app
+      APP_DIR: "app"  #edit this only if you change the name of the folder the Shiny R script is in
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       RSCONNECT_URL: ${{ secrets.RSCONNECT_URL }}
       RSCONNECT_APIKEY: ${{ secrets.RSCONNECT_APIKEY }}
@@ -41,6 +43,11 @@ jobs:
         run: |
           if (!requireNamespace("packrat", quietly = TRUE)) install.packages("packrat")
           if (!requireNamespace("rsconnect", quietly = TRUE)) install.packages("rsconnect")
+          if (!requireNamespace("Cairo", quietly = TRUE)) install.packages("Cairo")
+          options(shiny.usecairo = TRUE) #to fix bad aliasing in plots
+
+# For more detailed documentation on the following steps see 
+# https://github.com/rstudio/actions/tree/main/connect-publish
           
       - name: Generate manifest.json
         run: |
