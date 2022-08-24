@@ -5,7 +5,6 @@ library(tidyverse)
 library(ggsankey)
 library(plotly)
 library(colorspace)
-library(htmlwidgets) #necessary?
 
 
 # RStudio Connect runs relative to app/
