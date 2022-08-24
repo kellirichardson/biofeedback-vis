@@ -126,7 +126,7 @@ server <- function(input, output, session) {
       left_join(results_n, nodes, by = c("node" = "name")) %>%
       left_join(nodes, by = c("next_node" = "name")) %>%
       select(source = node.y, target = node.y.y,
-             value = n, n_refs, color = color.x) %>%
+             value = n, n_refs = n_refs.x, color = color.x) %>%
       na.omit()
     
 

@@ -11,7 +11,8 @@ df <- tribble(
   3   , "obesity", "once", "weight loss",
   3   , "obesity", "once", "activity level", #TODO tooltip from obsity to once should be 1 paper.
   4   , "obesity", "more than once", "weight loss",
-  5   , "obesity", "more than once", "weight loss"
+  5   , "obesity", "more than once", "weight loss",
+  6   , "diabetes", "once", "weight loss"
 )
 
 
@@ -40,9 +41,8 @@ nodes <-
 links <- 
   left_join(results_n, nodes, by = c("node" = "name")) %>%
   left_join(nodes, by = c("next_node" = "name")) %>%
-  select(source = node.y, target = node.y.y, value = n, n_refs, color = color.x) %>%
-  na.omit() %>%
-  as.data.frame() 
+  select(source = node.y, target = node.y.y, value = n, n_refs = n_refs.x, color = color.x) %>%
+  na.omit()
 
 
 # Make plot ---------------------------------------------------------------
@@ -87,7 +87,7 @@ plot_ly(
 ) %>% 
   layout(
     #TODO: fill the title in programmatically.
-    title = paste0("showing ", length(unique(df$doi)), " papers from ", minyr, "-", maxyr),
+    # title = paste0("showing ", length(unique(df$doi)), " papers from ", minyr, "-", maxyr),
     font = list(
       size = 12
     ),
