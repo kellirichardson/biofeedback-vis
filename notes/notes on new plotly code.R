@@ -40,11 +40,12 @@ results_n <-
   summarize(n = n(), 
             n_refs = length(unique(value)))
 
+#TODO: add colors in the nodes and links dataframes (or earlier?)
 # nodes
 nodes <-
   df_made_long %>%
   group_by(node) %>%
-  summarize(N_REFS = length(unique(value))) %>%
+  summarize(n_refs = length(unique(value))) %>%
   rename(name = node) %>% 
   mutate(node = 0:(n()-1)) %>% 
   as.data.frame()
@@ -78,6 +79,8 @@ plot_ly(
   #Define nodes
   node = list(
     label = nodes$name,
+    customdata =  nodes$n_refs,
+    hovertemplate = "References: %{customdata:.d}<br>Observations: %{value:.d}<extra></extra>",
     
     #not sure what this does.  Was hoping it would add axis labels
     groups = list(
@@ -86,29 +89,40 @@ plot_ly(
       "outcome" = c(0,1,6)
     ),
     
+    # styling
     pad = 20, #vertical padding between nodes
     thickness = 10, #horizontal thickness of node
     line = list(
       color = "black", #outline color
       width = 0.5 #outline width
-    ),
-    customdata =  nodes$N_REFS,
-    hovertemplate = "References: %{customdata:.d}<br>Observations: %{value:.d}<extra></extra>"
+    )
   ),
   
-  link = links
+  link = list(
+    source = links$source,
+    target = links$target,
+    value = links$value,
+    customdata = links$n_refs,
+    hovertemplate = "References: %{customdata:.d}<br>Observations: %{value:.d}<extra></extra>"
+  )
   
-  
-  #TODO: put both numbers of observations and number of # refs/papers
-  # hoverinfo = "all",
-  # hoverlabel = ,
 ) %>% 
   layout(
-    #TODO: fill the title in programmatically
+    #TODO: fill the title in programmatically.
     title = "__papers from ___ - ___",
     font = list(
       size = 12
     ),
     xaxis = list(showgrid = F, zeroline = F)
-  ) #%>% #trying to figure out how to add the axis labels
-  # add_text(text = I(c("one", "two", "three")), y = 0, x = c(1,2,3))
+  ) %>% 
+  # add step labels
+  add_annotations(
+    text = c("domain", "freq", "outcome"),
+    x = c(0, 0.5, 1),
+    y = -0.1, #below the bottom.  Use 1.1 for above the top.
+    showarrow = FALSE
+  )
+
+
+# https://python.plainenglish.io/sankeying-with-plotly-90500b87d8cf
+
