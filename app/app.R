@@ -111,18 +111,14 @@ server <- function(input, output, session) {
     # Create zero-indexed dataframe of nodes
     types <- unique(as.character(results_n$node))
     
-    # Function to count # of refs per node
-    count_ref <- function(x) {
-      temp <- sankey_data %>%
-        filter_all(any_vars(grepl(x, .)))
-      return(length(unique(temp$refid)))
-    }
-    N_REFS <- sapply(types, count_ref)
+    nodes <- 
+      longdf %>%
+      group_by(node) %>%
+    # Count # of refs per node
+      summarize(N_REFS = length(unique(value))) %>%
+      rename(name = node) %>% 
+      mutate(node = 0:(n()-1))
     
-    nodes <- data.frame(node = seq(from = 0, length.out = length(types)),
-                        name = types,
-                        N_REFS = N_REFS)
-
     # Join together for links table, omit NA
     links <- left_join(results_n, nodes, by = c("node" = "name")) %>%
       left_join(nodes, by = c("next_node" = "name")) %>%
