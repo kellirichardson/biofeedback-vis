@@ -1,6 +1,7 @@
 library(tidyverse)
 library(ggsankey)
-library(networkD3)
+library(plotly)
+library(RColorBrewer)
 
 df <- tribble(
   ~doi, ~domain, ~freq, ~outcome,
@@ -14,24 +15,7 @@ df <- tribble(
 )
 
 
-#ggsankey version:
-
 df_made_long <- ggsankey::make_long(df, domain, freq, outcome, value = doi) 
-
-ggplot(df_made_long, 
-       aes(x = x, 
-           next_x = next_x, 
-           node = node, 
-           next_node = next_node,
-           fill = factor(node),
-           label = node)
-) +
-  geom_sankey() +
-  geom_sankey_label() +
-  theme(legend.position = "none")
-
-
-# Networkd3 version:
 
 # Count number of observations for each link
 results_n <-
@@ -48,7 +32,8 @@ nodes <-
   summarize(n_refs = length(unique(value))) %>%
   rename(name = node) %>% 
   mutate(node = 0:(n()-1)) %>% 
-  as.data.frame()
+  #TODO: this pallette won't work with more than 8 colors
+  mutate(color = brewer.pal(n(), "Accent"))
 
 
 # edges
@@ -60,26 +45,22 @@ links <-
   rename(source = node.y,
          target = node.y.y,
          value = n) %>%
-  select(source, target, value, n_refs) %>%
+  select(source, target, value, n_refs, color.x) %>%
   na.omit() %>%
-  as.data.frame()
+  as.data.frame() 
 
-sankeyNetwork(Links = links, Nodes = nodes, Source = 'source', 
-              Target = 'target', Value = 'value', NodeID = 'name',
-              units = 'observations')
 
-# try a plotly version
-library(plotly)
+# Make plot ---------------------------------------------------------------
+
 plot_ly(
   type = "sankey",
   arrangement = "perpendicular", #keeps nodes in line.  Other possible options are "snap" or "fixed"
-  colors = colorRamp(colors = c("red", "green")), #doesn't seem to work
-  color = I("black"), #weirdly this is the text color for nodes
   
   #Define nodes
   node = list(
     label = nodes$name,
     customdata =  nodes$n_refs,
+    color = nodes$color,
     hovertemplate = "References: %{customdata:.d}<br>Observations: %{value:.d}<extra></extra>",
     
     #not sure what this does.  Was hoping it would add axis labels
@@ -102,6 +83,7 @@ plot_ly(
     source = links$source,
     target = links$target,
     value = links$value,
+    color = links$color.x,
     customdata = links$n_refs,
     hovertemplate = "References: %{customdata:.d}<br>Observations: %{value:.d}<extra></extra>"
   )
