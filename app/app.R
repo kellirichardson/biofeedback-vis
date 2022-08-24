@@ -85,7 +85,9 @@ server <- function(input, output, session) {
     #up sticking with ggplot
     sankey_data <- isolate(sankey_filtered() %>% 
       filter(year >= input$year_range[1] & year <= input$year_range[2]))
-    
+
+# Prep plotting data ------------------------------------------------------
+
     longdf <- sankey_data %>% 
       ggsankey::make_long(
         domain,
@@ -105,8 +107,6 @@ server <- function(input, output, session) {
                 n_refs = length(unique(value)))
     
     # Create zero-indexed dataframe of nodes
-    types <- unique(as.character(results_n$node))
-    
     nodes <- 
       longdf %>%
       group_by(node) %>%
@@ -119,12 +119,11 @@ server <- function(input, output, session) {
     links <- left_join(results_n, nodes, by = c("node" = "name")) %>%
       left_join(nodes, by = c("next_node" = "name")) %>%
       ungroup() %>%
-      rename(source = node.y,
+      select(source = node.y,
              target = node.y.y,
-             value = n) %>%
-      select(source, target, value, n_refs) %>%
-      na.omit() %>%
-      as.data.frame()
+             value = n,
+             n_refs) %>%
+      na.omit()
     
     # Sankey network
     sn <- sankeyNetwork(Links = links, Nodes = nodes, Source = 'source', 

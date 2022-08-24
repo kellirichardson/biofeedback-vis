@@ -41,11 +41,7 @@ nodes <-
 links <- 
   left_join(results_n, nodes, by = c("node" = "name")) %>%
   left_join(nodes, by = c("next_node" = "name")) %>%
-  ungroup() %>%
-  rename(source = node.y,
-         target = node.y.y,
-         value = n) %>%
-  select(source, target, value, n_refs, color.x) %>%
+  select(source = node.y, target = node.y.y, value = n, n_refs, color = color.x) %>%
   na.omit() %>%
   as.data.frame() 
 
@@ -83,7 +79,7 @@ plot_ly(
     source = links$source,
     target = links$target,
     value = links$value,
-    color = links$color.x,
+    color = links$color, #TODO: adjust alpha
     customdata = links$n_refs,
     hovertemplate = "References: %{customdata:.d}<br>Observations: %{value:.d}<extra></extra>"
   )
