@@ -1,7 +1,7 @@
 library(tidyverse)
 library(ggsankey)
 library(plotly)
-library(RColorBrewer)
+library(colorspace)
 
 df <- tribble(
   ~doi, ~domain, ~freq, ~outcome,
@@ -32,8 +32,7 @@ nodes <-
   summarize(n_refs = length(unique(value))) %>%
   rename(name = node) %>% 
   mutate(node = 0:(n()-1)) %>% 
-  #TODO: this pallette won't work with more than 8 colors
-  mutate(color = brewer.pal(n(), "Accent"))
+  mutate(color = qualitative_hcl(n(), alpha = 0.5))
 
 
 # edges
@@ -80,6 +79,7 @@ plot_ly(
     target = links$target,
     value = links$value,
     color = links$color, #TODO: adjust alpha
+    opacity = 0.5,
     customdata = links$n_refs,
     hovertemplate = "References: %{customdata:.d}<br>Observations: %{value:.d}<extra></extra>"
   )
