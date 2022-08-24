@@ -8,11 +8,7 @@ library(htmlwidgets)
 
 
 # RStudio Connect runs relative to app/
-articles  <- read_csv("articles_clean.csv") %>%
-  mutate(biomarker = if_else(biomarker == "Other", "Other biomarkers", biomarker),
-         collection = if_else(collection == "Other", "Other collection types", collection),
-         behavior = if_else(behavior == "Other", "Other behaviors", behavior),
-         outcome = if_else(outcome == "Other", "Other outcomes", outcome))
+articles  <- read_csv("articles_clean.csv")
 
 # But for development:
 # articles  <- read_csv("app/articles_clean.csv")
