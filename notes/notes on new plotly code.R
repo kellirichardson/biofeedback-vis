@@ -71,20 +71,44 @@ sankeyNetwork(Links = links, Nodes = nodes, Source = 'source',
 library(plotly)
 plot_ly(
   type = "sankey",
-  orientation = "h",
+  arrangement = "perpendicular", #keeps nodes in line.  Other possible options are "snap" or "fixed"
+  colors = colorRamp(colors = c("red", "green")), #doesn't seem to work
+  color = I("black"), #weirdly this is the text color for nodes
   
+  #Define nodes
   node = list(
     label = nodes$name,
-    pad = 15,
-    thickness = 20,
+    
+    #not sure what this does.  Was hoping it would add axis labels
+    groups = list(
+      "domain" = c(4,2),
+      "freq" = c(3,5),
+      "outcome" = c(0,1,6)
+    ),
+    
+    pad = 20, #vertical padding between nodes
+    thickness = 10, #horizontal thickness of node
     line = list(
-      color = "black",
-      width = 0.5
-    )
+      color = "black", #outline color
+      width = 0.5 #outline width
+    ),
+    customdata =  nodes$N_REFS,
+    hovertemplate = "References: %{customdata:.d}<br>Observations: %{value:.d}<extra></extra>"
   ),
   
+  link = links
+  
+  
   #TODO: put both numbers of observations and number of # refs/papers
-  link = links,
-  hoverinfo = "text",
+  # hoverinfo = "all",
   # hoverlabel = ,
-)
+) %>% 
+  layout(
+    #TODO: fill the title in programmatically
+    title = "__papers from ___ - ___",
+    font = list(
+      size = 12
+    ),
+    xaxis = list(showgrid = F, zeroline = F)
+  ) #%>% #trying to figure out how to add the axis labels
+  # add_text(text = I(c("one", "two", "three")), y = 0, x = c(1,2,3))
