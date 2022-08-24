@@ -87,7 +87,7 @@ plot_ly(
 ) %>% 
   layout(
     #TODO: fill the title in programmatically.
-    title = "__papers from ___ - ___",
+    title = paste0("showing ", length(unique(df$doi)), " papers from ", minyr, "-", maxyr),
     font = list(
       size = 12
     ),
@@ -99,7 +99,9 @@ plot_ly(
     x = c(0, 0.5, 1),
     y = -0.1, #below the bottom.  Use 1.1 for above the top.
     showarrow = FALSE
-  )
+  ) %>% 
+  #removes the toolbar, which doesn't do much for a Sankey diagram
+  config(displayModeBar = FALSE)
 
 
 # https://python.plainenglish.io/sankeying-with-plotly-90500b87d8cf
