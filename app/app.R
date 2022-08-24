@@ -6,11 +6,12 @@ library(ggsankey)
 library(networkD3)
 library(htmlwidgets)
 
+
 # RStudio Connect runs relative to app/
 articles  <- read_csv("articles_clean.csv") %>%
-  mutate(biomeasures = if_else(biomeasures == "Other", "Other biomeasures", biomeasures),
+  mutate(biomarker = if_else(biomarker == "Other", "Other biomarkers", biomarker),
          collection = if_else(collection == "Other", "Other collection types", collection),
-         behaviors = if_else(behaviors == "Other", "Other behaviors", behaviors),
+         behavior = if_else(behavior == "Other", "Other behaviors", behavior),
          outcome = if_else(outcome == "Other", "Other outcomes", outcome))
 
 # But for development:
@@ -20,17 +21,29 @@ articles  <- read_csv("articles_clean.csv") %>%
 # UI ----------------------------------------------------------------------
 
 ui <- fluidPage(
+  h1("Title"),
+  p("A short description could go here, but probably shouldn't be too long or you'll have to scroll down quite a bit to get to the rest of the app."),
   fluidRow(
+
+## Input panel -------------------------------------------------------------
     panel(
+      sliderInput(
+        inputId = "year_range",value = c(min(articles$year), max(articles$year)),
+        label = "Year Range",
+        min = min(articles$year),
+        max = max(articles$year),
+        sep = "",
+        dragRange = TRUE
+      ),
       selectizeGroupUI(
         id = "my-filters",
         params = list(
           domain = list(inputId = "domain", label = "Domain:"),
-          biomeasures = list(inputId = "biomeasures", label = "Biomeasures:"),
+          biomarker = list(inputId = "biomarker", label = "Biomarkers:"),
           collection = list(inputId = "collection", label = "Collection:"),
-          feedback_freq = list(inputId = "feedback_freq", label = "Frequency of Feedback:"),
+          frequency = list(inputId = "frequency", label = "Frequency of Feedback:"),
           communication = list(inputId = "communication", label = "Communication:"),
-          behaviors = list(inputId = "behaviors", label = "Behaviors:"),
+          behavior = list(inputId = "behavior", label = "Behaviors:"),
           outcome = list(inputId = "outcome", label = "Outcome:")
         )
       ),
@@ -52,34 +65,39 @@ ui <- fluidPage(
 # Server ------------------------------------------------------------------
 
 server <- function(input, output, session) {
-  
-  sankey_data <- callModule(
+
+# Filter data by selectize input ------------------------------------------
+  sankey_filtered <- callModule(
     module = selectizeGroupServer,
     id = "my-filters",
     data = articles,
-    vars = c("domain", "biomeasures", "collection", "outcome", 
-             "feedback_freq", "communication", "behaviors", "outcome")
-  )
-  
+    vars = c("domain", "biomarker", "collection", 
+             "frequency", "communication", "behavior", "outcome")
+  ) 
 
-  #render the plot
+
+# Render the plot --------------------------------------------------------
   output$sankey <- renderSankeyNetwork({
     #Take a dependency on the refresh button
     input$refresh
-    
+
+## Filter data ------------------------------------------------------------
     #use isolate() so the plot only updates when the button is clicked, not when
     #sankey_data is updated
     #could still update highlighting with every change by using sankey_data() in
     #a scale_color* call possibly.  Worry about this later in case we don't end
     #up sticking with ggplot
-    longdf <- isolate(sankey_data()) %>% 
+    sankey_data <- isolate(sankey_filtered() %>% 
+      filter(year >= input$year_range[1] & year <= input$year_range[2]))
+    
+    longdf <- sankey_data %>% 
       ggsankey::make_long(
         domain,
-        biomeasures,
+        biomarker,
         collection,
-        feedback_freq,
+        frequency,
         communication,
-        behaviors,
+        behavior,
         outcome,
         value = refid
       )
@@ -95,7 +113,7 @@ server <- function(input, output, session) {
     
     # Function to count # of refs per node
     count_ref <- function(x) {
-      temp <- sankey_data() %>%
+      temp <- sankey_data %>%
         filter_all(any_vars(grepl(x, .)))
       return(length(unique(temp$refid)))
     }
@@ -142,16 +160,17 @@ server <- function(input, output, session) {
     
     # return the result
     sn
+
   })
   
-  # download button function
+# Download button function ----------------------
   output$download <- downloadHandler(
     filename = function() {
       #constructs file name based on today's date
       paste('data-', Sys.Date(), '.csv', sep='')
     },
     content = function(file) {
-      write.csv(sankey_data(), file)
+      write.csv(sankey_data, file)
     }
   )
 }
