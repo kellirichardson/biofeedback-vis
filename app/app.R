@@ -14,8 +14,20 @@ articles  <- read_csv("articles_clean.csv")
 # UI ----------------------------------------------------------------------
 
 ui <- fluidPage(
+  h1("Title"),
+  p("A short description could go here, but probably shouldn't be too long or you'll have to scroll down quite a bit to get to the rest of the app."),
   fluidRow(
+
+## Input panel -------------------------------------------------------------
     panel(
+      sliderInput(
+        inputId = "year_range",value = c(min(articles$year), max(articles$year)),
+        label = "Year Range",
+        min = min(articles$year),
+        max = max(articles$year),
+        sep = "",
+        dragRange = TRUE
+      ),
       selectizeGroupUI(
         id = "my-filters",
         params = list(
@@ -46,27 +58,32 @@ ui <- fluidPage(
 # Server ------------------------------------------------------------------
 
 server <- function(input, output, session) {
-  
-  sankey_data <- callModule(
+
+# Filter data by selectize input ------------------------------------------
+  sankey_filtered <- callModule(
     module = selectizeGroupServer,
     id = "my-filters",
     data = articles,
     vars = c("domain", "biomarker", "collection", 
              "frequency", "communication", "behavior", "outcome")
-  )
-  
+  ) 
 
-  #render the plot
+  
+# Render the plot --------------------------------------------------------
   output$sankey <- renderPlot({
     #Take a dependency on the refresh button
     input$refresh
-    
+
+## Filter data ------------------------------------------------------------
     #use isolate() so the plot only updates when the button is clicked, not when
     #sankey_data is updated
     #could still update highlighting with every change by using sankey_data() in
     #a scale_color* call possibly.  Worry about this later in case we don't end
     #up sticking with ggplot
-    plotdf <- isolate(sankey_data()) %>% 
+    sankey_data <- isolate(sankey_filtered() %>% 
+      filter(year >= input$year_range[1] & year <= input$year_range[2]))
+    
+    plotdf <- sankey_data %>% 
       ggsankey::make_long(
         domain,
         biomarker,
@@ -76,7 +93,8 @@ server <- function(input, output, session) {
         behavior,
         outcome
       )
-    
+
+# Build the Plot --------------------------------------------------------
     ggplot(plotdf,
            aes(x = x, 
                next_x = next_x, 
@@ -110,14 +128,14 @@ server <- function(input, output, session) {
       xlab(NULL)
   })
   
-  # download button function
+# Download button function ----------------------
   output$download <- downloadHandler(
     filename = function() {
       #constructs file name based on today's date
       paste('data-', Sys.Date(), '.csv', sep='')
     },
     content = function(file) {
-      write.csv(sankey_data(), file)
+      write.csv(sankey_data, file)
     }
   )
 }
