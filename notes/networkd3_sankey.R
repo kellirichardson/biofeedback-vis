@@ -55,19 +55,12 @@ results_n <- Sankey %>%
 
 # Create nodes dataframe, must be zero-indexed
 types <- unique(as.character(results_n$node))
-count_ref <- function(x) {
-  temp <- articles %>%
-    select(Refid, Domain, Biomeasures, Collection, 
-           'Frequency of feedback', Communication, 
-           Behaviors, Outcome) %>%
-    filter_all(any_vars(grepl(x, .)))
-  return(length(unique(temp$Refid)))
-}
-N_REFS <- sapply(types, count_ref)
-
-nodes <- data.frame(node = seq(from = 0, length.out = length(types)),
-                    name = types,
-                    N_REFS = N_REFS)
+  nodes <- 
+    Sankey %>%
+    group_by(node) %>%
+    summarize(N_REFS = length(unique(value))) %>%
+    rename(name = node) %>% 
+    mutate(node = 0:(n()-1))
 
 # Create links dataframe
 links <- left_join(results_n, nodes, by = c("node" = "name")) %>%
