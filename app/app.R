@@ -3,6 +3,9 @@ library(shinyWidgets) #for selectizeGroup widget
 library(shinycssloaders) #for loading indicator
 library(tidyverse)
 library(ggsankey)
+library(plotly)
+library(colorspace)
+
 
 # RStudio Connect runs relative to app/
 articles  <- read_csv("articles_clean.csv")
@@ -45,7 +48,7 @@ ui <- fluidPage(
   ),
   
   fluidRow(
-    plotOutput(
+    plotlyOutput(
       "sankey",
       width = "100%", #span entire page
       height = "600px" #adjust height here
@@ -68,9 +71,9 @@ server <- function(input, output, session) {
              "frequency", "communication", "behavior", "outcome")
   ) 
 
-  
+
 # Render the plot --------------------------------------------------------
-  output$sankey <- renderPlot({
+  output$sankey <- renderPlotly({
     #Take a dependency on the refresh button
     input$refresh
 
@@ -83,7 +86,13 @@ server <- function(input, output, session) {
     sankey_data <- isolate(sankey_filtered() %>% 
       filter(year >= input$year_range[1] & year <= input$year_range[2]))
     
-    plotdf <- sankey_data %>% 
+    #isolate these for constructing title
+    start_yr <- isolate(input$year_range[1])
+    end_yr <- isolate(input$year_range[2])
+
+# Prep plotting data ------------------------------------------------------
+
+    longdf <- sankey_data %>% 
       ggsankey::make_long(
         domain,
         biomarker,
@@ -91,41 +100,104 @@ server <- function(input, output, session) {
         frequency,
         communication,
         behavior,
-        outcome
+        outcome,
+        value = refid
       )
+    
+    # Count observations for each set of links
+    results_n <- longdf %>%
+      group_by(node, next_node) %>%
+      summarize(n = n(), 
+                n_refs = length(unique(value)))
+    
+    # Create zero-indexed dataframe of nodes
+    nodes <-
+      longdf %>%
+      group_by(node) %>%
+      #count number of unique references
+      summarize(n_refs = length(unique(value))) %>%
+      rename(name = node) %>% 
+      mutate(node = 0:(n()-1)) %>% 
+      mutate(color = qualitative_hcl(n(), alpha = 0.5))
+    
+    # Join together for links table, omit NA
+    links <- 
+      left_join(results_n, nodes, by = c("node" = "name")) %>%
+      left_join(nodes, by = c("next_node" = "name")) %>%
+      select(source = node.y, target = node.y.y,
+             value = n, n_refs = n_refs.x, color = color.x) %>%
+      na.omit()
+    
 
-# Build the Plot --------------------------------------------------------
-    ggplot(plotdf,
-           aes(x = x, 
-               next_x = next_x, 
-               node = node, 
-               next_node = next_node,
-               fill = factor(node),
-               label = node)) +
-      geom_sankey(
-        flow.alpha = 0.5,
-        node.color = "gray30", #color of node outline
-        width = 0.1 #node width
-      ) +
-      geom_sankey_label(
-        size = 3.5,
-        fill = "white",
-        color = "darkblue", #outline and text color
-        family = "Arial", #set label font
-        label.padding = unit(0.2, "lines"), #padding between text and label outline
-        label.size = 0.2, #thickness of line around label
-        label.r = unit(0.1, "lines") #roundness of label corners
-      ) +
-      
-      #set x-axis labels manually
-      scale_x_discrete(
-        labels = c("Domain", "Biomarkers", "Collection",
-                   "Frequency of Feedback", "Communication",
-                   "Behaviors", "Outcome")
-      ) +
-      theme_sankey(base_size = 16) + 
-      theme(legend.position = "none") + 
-      xlab(NULL)
+# Plotly plot -------------------------------------------------------------
+      plot_ly(
+        type = "sankey",
+        arrangement = "perpendicular", #keeps nodes in line.  Other possible options are "snap" or "fixed"
+
+        #Define nodes
+        node = list(
+          label = nodes$name,
+          customdata = nodes$n_refs,
+          color = nodes$color,
+          hovertemplate = "References: %{customdata:.d}<br>Observations: %{value:.d}<extra></extra>",
+
+          # styling
+          pad = 20, #vertical padding between nodes
+          thickness = 10, #horizontal thickness of node
+          line = list(
+            color = "black", #outline color
+            width = 0.5 #outline width
+          )
+        ),
+
+        link = list(
+          source = links$source,
+          target = links$target,
+          value = links$value,
+          color = links$color,
+          customdata = links$n_refs,
+          hovertemplate = "References: %{customdata:.d}<br>Observations: %{value:.d}<extra></extra>"
+        )
+
+      ) %>%
+        layout(
+          #programmatically construct the title
+          title = paste0(
+            "Displaying ",
+            length(unique(sankey_data$refid)),
+            " papers from ",
+            start_yr, 
+            "-", 
+            end_yr
+          ),
+          #set font for whole plot
+          font = list(
+            size = 12
+          ),
+          #add some margin so annotations show up
+          margin = list(
+            l = 100,
+            r = 100,
+            b = 100
+          )
+        ) %>%
+        # add step labels
+        add_annotations(
+          text = c("<b>Domain</b>", "<b>Biomarker</b>", "<b>Collection Method</b>",
+                   "<b>Frequency of Feedback</b>", "<b>Communication</b>",
+                   "<b>Behavior</b>", "<b>Outcome</b>"),
+          x = seq(0, 1, length.out = 7),
+          y = -0.1, #below the bottom.  Use >1 for above the top.
+          xanchor = "center", #center labels on steps
+          showarrow = FALSE,
+          font = list(
+            size = 14
+          )
+        ) %>%
+        #removes the toolbar, which doesn't do much for a Sankey diagram
+        config(displayModeBar = FALSE)
+
+  
   })
   
 # Download button function ----------------------
