@@ -6,6 +6,32 @@ library(ggsankey)
 library(plotly)
 library(colorspace)
 
+palKelly <- function(n) {
+  pal <- c(
+    # "#f2f3f4", "#222222", # white and black removed
+    "#f3c300", "#875692", "#f38400", "#a1caf1", "#be0032", "#c2b280",
+    "#848482", "#008856", "#e68fac", "#0067a5", "#f99379", "#604e97",
+    "#f6a600", "#b3446c", "#dcd300", "#882d17", "#8db600", "#654522",
+    "#e25822", "#2b3d26"
+  )
+  while(n > length(pal)) {
+    pal <- c(pal, pal)
+  }
+  pal[1:n]
+}
+
+palTableau20 <- function(n) {
+  pal <- c(
+    '#4E79A7','#A0CBE8','#F28E2B','#FFBE7D','#59A14F','#8CD17D',
+    '#B6992D','#F1CE63','#499894','#86BCB6','#E15759','#FF9D9A',
+    '#79706E','#BAB0AC','#D37295','#FABFD2','#B07AA1','#D4A6C8',
+    '#9D7660','#D7B5A6'
+    )
+  while(n > length(pal)) {
+    pal <- c(pal, pal)
+  }
+  pal[1:n]
+}
 
 # RStudio Connect runs relative to app/
 articles  <- read_csv("articles_clean.csv")
@@ -118,7 +144,7 @@ server <- function(input, output, session) {
       summarize(n_refs = length(unique(value))) %>%
       rename(name = node) %>% 
       mutate(node = 0:(n()-1)) %>% 
-      mutate(color = qualitative_hcl(n(), alpha = 0.5))
+      mutate(color = palTableau20(n()))
     
     # Join together for links table, omit NA
     links <- 
@@ -154,7 +180,7 @@ server <- function(input, output, session) {
           source = links$source,
           target = links$target,
           value = links$value,
-          color = links$color,
+          color = adjust_transparency(links$color, 0.5),
           customdata = links$n_refs,
           hovertemplate = "References: %{customdata:.d}<br>Observations: %{value:.d}<extra></extra>"
         )
