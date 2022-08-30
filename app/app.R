@@ -118,7 +118,7 @@ server <- function(input, output, session) {
       summarize(n_refs = length(unique(value))) %>%
       rename(name = node) %>% 
       mutate(node = 0:(n()-1)) %>% 
-      mutate(color = qualitative_hcl(n(), alpha = 0.5))
+      mutate(color = qualitative_hcl(n()))
     
     # Join together for links table, omit NA
     links <- 
@@ -146,7 +146,7 @@ server <- function(input, output, session) {
           thickness = 10, #horizontal thickness of node
           line = list(
             color = "black", #outline color
-            width = 0.5 #outline width
+            width = 0 #outline width
           )
         ),
 
@@ -154,7 +154,8 @@ server <- function(input, output, session) {
           source = links$source,
           target = links$target,
           value = links$value,
-          color = links$color,
+          #add transparency to link colors
+          color = colorspace::adjust_transparency(links$color, alpha = 0.5),
           customdata = links$n_refs,
           hovertemplate = "%{source.label} → %{target.label}<br>%{customdata:.d} references<extra></extra>"
         )
