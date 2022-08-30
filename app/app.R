@@ -139,7 +139,7 @@ server <- function(input, output, session) {
           label = nodes$name,
           customdata = nodes$n_refs,
           color = nodes$color,
-          hovertemplate = "References: %{customdata:.d}<br>Observations: %{value:.d}<extra></extra>",
+          hovertemplate = "%{label}<br>%{customdata:.d} references<extra></extra>",
 
           # styling
           pad = 20, #vertical padding between nodes
@@ -156,7 +156,7 @@ server <- function(input, output, session) {
           value = links$value,
           color = links$color,
           customdata = links$n_refs,
-          hovertemplate = "References: %{customdata:.d}<br>Observations: %{value:.d}<extra></extra>"
+          hovertemplate = "%{source.label} → %{target.label}<br>%{customdata:.d} references<extra></extra>"
         )
 
       ) %>%

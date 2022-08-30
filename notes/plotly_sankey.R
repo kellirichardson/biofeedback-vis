@@ -56,7 +56,7 @@ plot_ly(
     label = nodes$name,
     customdata =  nodes$n_refs,
     color = nodes$color,
-    hovertemplate = "References: %{customdata:.d}<br>Observations: %{value:.d}<extra></extra>",
+    hovertemplate = "%{label}<br>%{customdata:.d} references<extra></extra>",
     
     #not sure what this does.  Was hoping it would add axis labels
     groups = list(
@@ -80,8 +80,8 @@ plot_ly(
     value = links$value,
     color = links$color, #TODO: adjust alpha
     opacity = 0.5,
-    customdata = links$n_refs,
-    hovertemplate = "References: %{customdata:.d}<br>Observations: %{value:.d}<extra></extra>"
+    customdata =  links$n_refs,
+    hovertemplate = "%{customdata:.d} references<br> From '%{source.label}' to '%{target.label}<extra></extra>'"
   )
   
 ) %>% 
