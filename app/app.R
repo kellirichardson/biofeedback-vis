@@ -103,7 +103,9 @@ server <- function(input, output, session) {
         outcome,
         value = refid
       )
-    
+    validate(
+      need(nrow(longdf) > 0, "No data with this combination of filters!")
+    )
     # Count observations for each set of links
     results_n <- longdf %>%
       group_by(node, next_node) %>%
