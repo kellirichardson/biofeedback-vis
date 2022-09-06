@@ -182,7 +182,6 @@ server <- function(input, output, session) {
           source = links$source,
           target = links$target,
           value = links$value,
-          #add transparency to link colors
           color = colorspace::adjust_transparency(links$color, alpha = 0.5),
           customdata = links$n_refs,
           hovertemplate = "%{source.label} → %{target.label}<br>%{customdata:.d} references<extra></extra>"
