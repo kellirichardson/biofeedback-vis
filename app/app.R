@@ -6,20 +6,6 @@ library(ggsankey)
 library(plotly)
 library(colorspace)
 
-palKelly <- function(n) {
-  pal <- c(
-    # "#f2f3f4", "#222222", # white and black removed
-    "#f3c300", "#875692", "#f38400", "#a1caf1", "#be0032", "#c2b280",
-    "#848482", "#008856", "#e68fac", "#0067a5", "#f99379", "#604e97",
-    "#f6a600", "#b3446c", "#dcd300", "#882d17", "#8db600", "#654522",
-    "#e25822", "#2b3d26"
-  )
-  while(n > length(pal)) {
-    pal <- c(pal, pal)
-  }
-  pal[1:n]
-}
-
 palTableau20 <- function(n) {
   pal <- c(
     '#4E79A7','#A0CBE8','#F28E2B','#FFBE7D','#59A14F','#8CD17D',
