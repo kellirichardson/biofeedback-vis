@@ -11,7 +11,6 @@ articles_raw <- read_csv("data_raw/Scoping.csv")
 articles <-
   articles_raw %>%
   clean_names() %>% #make column names programming-friendly
-  rename(biomarker = "biological_measures") %>% 
   
   # Next, separate by commas, but only ones that don't have a space after them to
   # keep the "Other : " sentences together.  The ",(?!\\s)" is a "regular
@@ -28,9 +27,9 @@ articles <-
   # Now replace anything that starts with "Other : " with "Other" to lump
   # categories (the "^" is another bit of regex that just says this has to be at
   # the beginning of a string)
-  mutate(biomarker = if_else(str_detect(biomarker, "^Other : "), "Other biomarkers", biomarker),
-         collection = if_else(str_detect(collection, "^Other : "), "Other collection types", collection),
-         behavior = if_else(str_detect(behavior, "^Other : "), "Other behaviors", behavior),
-         outcome = if_else(str_detect(outcome, "^Other : "), "Other outcomes", outcome))
+  mutate(biomarker = if_else(str_detect(biomarker, "^Other"), "Other biomarkers", biomarker),
+         collection = if_else(str_detect(collection, "^Other"), "Other collection types", collection),
+         behavior = if_else(str_detect(behavior, "^Other"), "Other behaviors", behavior),
+         outcome = if_else(str_detect(outcome, "^Other"), "Other outcomes", outcome))
 
 write_csv(articles, "app/articles_clean.csv")
