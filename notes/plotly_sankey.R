@@ -70,8 +70,8 @@ plot_ly(
   node = list(
     label = nodes$name,
     customdata =  nodes$n_refs,
-    color = nodes$color,
-    hovertemplate = "References: %{customdata:.d}<br>Observations: %{value:.d}<extra></extra>",
+    color = nodes$color, 
+    hovertemplate = "%{label}<br>%{customdata:.d} references<extra></extra>",
     
     #not sure what this does.  Was hoping it would add axis labels
     groups = list(
@@ -93,10 +93,10 @@ plot_ly(
     source = links$source,
     target = links$target,
     value = links$value,
-    color = links$color, #TODO: adjust alpha
+    color = colorspace::adjust_transparency(links$color, alpha = 0.5), #TODO: adjust alpha here instead of above
     opacity = 0.5,
-    customdata = links$n_refs,
-    hovertemplate = "References: %{customdata:.d}<br>Observations: %{value:.d}<extra></extra>"
+    customdata =  links$n_refs,
+    hovertemplate = "%{customdata:.d} references<br> From '%{source.label}' to '%{target.label}<extra></extra>'"
   )
   
 ) %>% 
@@ -106,6 +106,7 @@ plot_ly(
     font = list(
       size = 12
     ),
+    margin = list(l = 50, r = 200, b = 50, t = 50, pad = 40),
     xaxis = list(showgrid = F, zeroline = F)
   ) %>% 
   # add step labels

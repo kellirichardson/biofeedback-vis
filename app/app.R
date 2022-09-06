@@ -129,7 +129,9 @@ server <- function(input, output, session) {
         outcome,
         value = refid
       )
-    
+    validate(
+      need(nrow(longdf) > 0, "No data with this combination of filters!")
+    )
     # Count observations for each set of links
     results_n <- longdf %>%
       group_by(node, next_node) %>%
@@ -165,14 +167,14 @@ server <- function(input, output, session) {
           label = nodes$name,
           customdata = nodes$n_refs,
           color = nodes$color,
-          hovertemplate = "References: %{customdata:.d}<br>Observations: %{value:.d}<extra></extra>",
+          hovertemplate = "%{label}<br>%{customdata:.d} references<extra></extra>",
 
           # styling
           pad = 20, #vertical padding between nodes
           thickness = 10, #horizontal thickness of node
           line = list(
             color = "black", #outline color
-            width = 0.5 #outline width
+            width = 0 #outline width
           )
         ),
 
@@ -180,9 +182,10 @@ server <- function(input, output, session) {
           source = links$source,
           target = links$target,
           value = links$value,
-          color = adjust_transparency(links$color, 0.5),
+          #add transparency to link colors
+          color = colorspace::adjust_transparency(links$color, alpha = 0.5),
           customdata = links$n_refs,
-          hovertemplate = "References: %{customdata:.d}<br>Observations: %{value:.d}<extra></extra>"
+          hovertemplate = "%{source.label} → %{target.label}<br>%{customdata:.d} references<extra></extra>"
         )
 
       ) %>%
