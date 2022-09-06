@@ -3,6 +3,20 @@ library(ggsankey)
 library(plotly)
 library(colorspace)
 
+palKelly <- function(n) {
+  pal <- c(
+    # "#f2f3f4", "#222222", # white and black removed
+    "#f3c300", "#875692", "#f38400", "#a1caf1", "#be0032", "#c2b280",
+    "#848482", "#008856", "#e68fac", "#0067a5", "#f99379", "#604e97",
+    "#f6a600", "#b3446c", "#dcd300", "#882d17", "#8db600", "#654522",
+    "#e25822", "#2b3d26"
+  )
+  while(n > length(pal)) {
+    pal <- c(pal, pal)
+  }
+  pal[1:n]
+}
+
 df <- tribble(
   ~doi, ~domain, ~freq, ~outcome,
   1   , "diabetes", "once", "blood sugar reduction",
@@ -33,7 +47,8 @@ nodes <-
   summarize(n_refs = length(unique(value))) %>%
   rename(name = node) %>% 
   mutate(node = 0:(n()-1)) %>% 
-  mutate(color = qualitative_hcl(n())) #TODO: only add transparency to links.  That means doing this inside of plot_ly(link=list()) I think.
+  mutate(color = palKelly(n())) #TODO: only add transparency to links.  That means doing this inside of plot_ly(link=list()) I think.
+
 
 
 # edges
