@@ -30,6 +30,7 @@ articles <-
   mutate(biomarker = if_else(str_detect(biomarker, "^Other"), "Other biomarkers", biomarker),
          collection = if_else(str_detect(collection, "^Other"), "Other collection types", collection),
          behavior = if_else(str_detect(behavior, "^Other"), "Other behaviors", behavior),
-         outcome = if_else(str_detect(outcome, "^Other"), "Other outcomes", outcome))
+         outcome = if_else(str_detect(outcome, "^Other"), "Other outcomes", outcome), 
+         domain = if_else(str_detect(domain, "^Other"), "Other domains", domain))
 
 write_csv(articles, "app/articles_clean.csv")
