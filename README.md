@@ -6,7 +6,7 @@
 [![deploy-to-connect](https://github.com/cct-datascience/biofeedback-vis/actions/workflows/deploy-to-connect.yaml/badge.svg)](https://github.com/cct-datascience/biofeedback-vis/actions/workflows/deploy-to-connect.yaml)
 <!-- badges: end -->
 
-An interactive visualization was delevoped using data from a scoping review on biological feedback as a behavior change technique for adults in randomized clinical trials. The visualization is designed to allow users to isolate and extract studies most relevant to their field of interest.
+An interactive visualization was developed using data from a scoping review on biological feedback as a behavior change technique for adults in randomized clinical trials. The visualization is designed to allow users to isolate and extract studies most relevant to their field of interest.
 
 Protocol DOI: 10.2196/32579
 
