@@ -1,13 +1,16 @@
 
-# biofeedback-vis
+# Health Behavior Change Interventions Using Biological Feedback
+
 
 <!-- badges: start -->
 [![deploy-to-connect](https://github.com/cct-datascience/biofeedback-vis/actions/workflows/deploy-to-connect.yaml/badge.svg)](https://github.com/cct-datascience/biofeedback-vis/actions/workflows/deploy-to-connect.yaml)
 <!-- badges: end -->
 
-The goal of biofeedback-vis is to ...
+An interactive visualization was developed using data from a scoping review on biological feedback as a behavior change technique for adults in randomized clinical trials. The visualization is designed to allow users to isolate and extract studies most relevant to their field of interest.
 
-[Shiny App](https://viz.datascience.arizona.edu/biofeedback_sankey/)
+Protocol DOI: 10.2196/32579
+
+[Interactive Visualization](https://viz.datascience.arizona.edu/biofeedback_sankey/)
 
 ## Collaboration Guidelines
 
