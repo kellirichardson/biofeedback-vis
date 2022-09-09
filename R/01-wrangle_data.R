@@ -4,7 +4,7 @@ library(tidyverse)
 library(janitor)
 
 # Read in data ------------------------------------------------------------
-articles_raw <- read_csv("data_raw/Scoping.csv")
+articles_raw <- read_csv("data_raw/scoping.csv")
 
 # Clean data --------------------------------------------------------------
 
