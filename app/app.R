@@ -29,8 +29,9 @@ articles  <- read_csv("articles_clean.csv")
 # UI ----------------------------------------------------------------------
 
 ui <- fluidPage(
-  h1("Title"),
-  p("A short description could go here, but probably shouldn't be too long or you'll have to scroll down quite a bit to get to the rest of the app."),
+  h1("Health Behavior Change Interventions Using Biological Feedback"),
+  p("Below is an interactive visualization of data from a scoping review on biological feedback as a behavior change technique for adults in randomized clinical trials.
+    Protocol DOI: 10.2196/32579"),
   fluidRow(
 
 ## Input panel -------------------------------------------------------------
