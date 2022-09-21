@@ -30,7 +30,7 @@ domain_filter <- c("Overweight/Obesity", "CVD")
 # Filter data to simulate someone using the app
 sankey_data <-
   sankey_data %>%
-  filter(year >= start_yr, yr <= end_yr) %>% 
+  filter(year >= start_yr, year <= end_yr) %>% 
   filter(domain %in% domain_filter)
 
 
