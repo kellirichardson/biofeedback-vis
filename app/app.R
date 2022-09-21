@@ -76,30 +76,33 @@ ui <- fluidPage(
 server <- function(input, output, session) {
 
 # Filter data by selectize input ------------------------------------------
-  sankey_filtered <- callModule(
+  sankey_selected <- callModule(
     module = selectizeGroupServer,
     id = "my-filters",
     data = articles,
     vars = c("domain", "biomarker", "collection", 
              "frequency", "communication", "behavior", "outcome")
   ) 
+  #create new reactive expression sankey_filtered() to be also filtered by year
+  sankey_filtered <- 
+    reactive(
+      sankey_selected() %>%
+        filter(year >= input$year_range[1] & year <= input$year_range[2])
+      )
 
 
 # Render the plot --------------------------------------------------------
   output$sankey <- renderPlotly({
-    #Take a dependency on the refresh button
+    #include the refresh button so plot updates when refresh is clicked
     input$refresh
 
 ## Filter data ------------------------------------------------------------
-    #use isolate() so the plot only updates when the button is clicked, not when
-    #sankey_data is updated
-    #could still update highlighting with every change by using sankey_data() in
-    #a scale_color* call possibly.  Worry about this later in case we don't end
-    #up sticking with ggplot
-    sankey_data <- isolate(sankey_filtered() %>% 
-      filter(year >= input$year_range[1] & year <= input$year_range[2]))
+    #use isolate() so changes to sankey_filtered() don't trigger the plot to
+    #update
+    sankey_data <- isolate(sankey_filtered())
     
-    #isolate these for constructing title
+    #Get years for constructing a title, but use isolate() so changes to
+    #year_range don't trigger plot refresh
     start_yr <- isolate(input$year_range[1])
     end_yr <- isolate(input$year_range[2])
 
@@ -222,7 +225,7 @@ server <- function(input, output, session) {
       paste('data-', Sys.Date(), '.csv', sep='')
     },
     content = function(file) {
-      write.csv(sankey_data, file)
+      write.csv(sankey_filtered(), file)
     }
   )
 }
