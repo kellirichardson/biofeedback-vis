@@ -8,11 +8,11 @@
 
 An interactive visualization was developed using data from a scoping review on biological feedback as a behavior change technique for adults in randomized clinical trials. The visualization is designed to allow users to isolate and extract studies most relevant to their field of interest.
 
-Protocol: https://www.researchprotocols.org/2022/1/e32579
-
 [Link to Interactive Visualization](https://viz.datascience.arizona.edu/biofeedback_sankey/)
 
 The visualization was made through the University of Arizona Communications and Cyber Technologies (CCT) Data Science Incubator Program. Please contact Dr. Susan Schembre, PhD, RD at ss4731@georgetown.edu if you have questions or comments. 
+
+Protocol: https://www.researchprotocols.org/2022/1/e32579
 
 ## Collaboration Guidelines
 
