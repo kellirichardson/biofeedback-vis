@@ -4,6 +4,7 @@
 
 <!-- badges: start -->
 [![deploy-to-connect](https://github.com/cct-datascience/biofeedback-vis/actions/workflows/deploy-to-connect.yaml/badge.svg)](https://github.com/cct-datascience/biofeedback-vis/actions/workflows/deploy-to-connect.yaml)
+[![DOI](https://zenodo.org/badge/507096000.svg)](https://zenodo.org/badge/latestdoi/507096000)
 <!-- badges: end -->
 
 An interactive visualization was developed using data from a scoping review on biological feedback as a behavior change technique for adults in randomized clinical trials. The visualization is designed to allow users to isolate and extract studies most relevant to their field of interest.
