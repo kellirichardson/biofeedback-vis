@@ -57,14 +57,25 @@ results_n <- longdf %>%
 
 
 # Create zero-indexed dataframe of nodes
-nodes <-
-  longdf %>%
+nodes <-longdf %>%
   group_by(node) %>%
   #count number of unique references
-  summarize(n_refs = length(unique(value))) %>%
+  summarize(n_refs = length(unique(value)),
+            x = unique(x)) %>%
   ungroup() %>% 
   mutate(node_index = 0:(n()-1)) %>% 
   mutate(color = qualitative_hcl(n()))
+
+# Add row
+extra_node <- data.frame("",
+                        NA, 
+                        "",
+                        max(nodes$node_index) + 1,
+                        rgb(1, 1, 1)) %>%
+  setNames(colnames(nodes))
+
+nodes <- nodes  %>%
+  add_row(extra_node)
 
 # To manually set order of nodes, we need to keep information about "step" (e.g. domain, outcome, etc.).  Need a column "node_x" with numbers 0:7 corresponding to step. Also need a column "node_y" 0:? that defines order *within* each step. https://stackoverflow.com/a/65572354/8117178. Something like:
 
@@ -87,8 +98,27 @@ links <-
   left_join(results_n, nodes, by = c("node" = "node")) %>%
   left_join(nodes, by = c("next_node" = "node")) %>%
   select(source = node_index.x, target = node_index.y,
-         value = n, n_refs = n_refs.x, color = color.x) %>%
-  na.omit()
+         value = n, n_refs = n_refs.x, color = color.x,
+         x_start = x.x, x_end = x.y, node_end = next_node) %>%
+  na.omit() %>%
+  ungroup()
+
+# Add rows
+end_nodes <- unique(links$node_end[links$x_end == "outcome"])
+n_row <- length(end_nodes) # number of nodes in last column
+extra_links <- data.frame(end_nodes,
+                          nodes$node_index[nodes$node %in% end_nodes],
+                          rep(max(links$target) + 1, n_row),
+                          rep(1, n_row),
+                          rep(NA, n_row),
+                          rep(rgb(1, 1, 1), n_row),
+                          rep("outcome", n_row),
+                          rep("", n_row),
+                          rep("", n_row)) %>%
+  setNames(colnames(links))
+
+links <- links  %>%
+  add_row(extra_links)
 
 
 # Plotly plot -------------------------------------------------------------
@@ -145,10 +175,10 @@ plot_ly(
   ) %>%
   # add step labels
   add_annotations(
-    text = c("<b>Domain</b>", "<b>Biomarker</b>", "<b>Collection Method</b>",
-             "<b>Frequency of Feedback</b>", "<b>Communication</b>",
-             "<b>Behavior</b>", "<b>Outcome</b>"),
-    x = seq(0, 1, length.out = 7),
+    text = c("<b>Domain</b>", "<b>Biomarker</b>", "<b>Collection <br> Method</b>",
+             "<b>Frequency of <br> Feedback</b>", "<b>Communication</b>",
+             "<b>Behavior</b>", "<b>Outcome</b>", ""),
+    x = seq(0, 1, length.out = 8),
     y = -0.1, #below the bottom.  Use >1 for above the top.
     xanchor = "center", #center labels on steps
     showarrow = FALSE,
