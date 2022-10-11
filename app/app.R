@@ -133,18 +133,50 @@ server <- function(input, output, session) {
       longdf %>%
       group_by(node) %>%
       #count number of unique references
-      summarize(n_refs = length(unique(value))) %>%
-      rename(name = node) %>% 
-      mutate(node = 0:(n()-1)) %>% 
+      summarize(n_refs = length(unique(value)),
+                x = unique(x)) %>%
+      #rename(name = node) %>% 
+      mutate(node_index = 0:(n()-1)) %>% 
       mutate(color = palTableau20(n()))
+    
+    #Add row for dummy 8th column 
+    extra_node <- data.frame("",
+                             NA, 
+                             "",
+                             max(nodes$node_index) + 1,
+                             rgb(1, 1, 1)) %>%
+      setNames(colnames(nodes))
+    
+    nodes <- nodes  %>%
+      add_row(extra_node)
+    
     
     # Join together for links table, omit NA
     links <- 
-      left_join(results_n, nodes, by = c("node" = "name")) %>%
-      left_join(nodes, by = c("next_node" = "name")) %>%
-      select(source = node.y, target = node.y.y,
-             value = n, n_refs = n_refs.x, color = color.x) %>%
-      na.omit()
+      left_join(results_n, nodes, by = c("node" = "node")) %>%
+      left_join(nodes, by = c("next_node" = "node")) %>%
+      select(source = node_index.x, target = node_index.y,
+             value = n, n_refs = n_refs.x, color = color.x, 
+             x_start = x.x, x_end = x.y, node_end = next_node) %>%
+      na.omit() %>%
+      ungroup()
+    
+    # Add rows; each node in outcome must point to 8th column node 
+    end_nodes <- unique(links$node_end[links$x_end == "outcome"])
+    n_row <- length(end_nodes) # number of nodes in outcome column
+    extra_links <- data.frame(end_nodes,
+                              nodes$node_index[nodes$node %in% end_nodes],
+                              rep(max(links$target) + 1, n_row),
+                              rep(1, n_row),
+                              rep(NA, n_row),
+                              rep(rgb(1, 1, 1), n_row),
+                              rep("outcome", n_row),
+                              rep("", n_row),
+                              rep("", n_row)) %>%
+      setNames(colnames(links))
+    
+    links <- links  %>%
+      add_row(extra_links)
     
 
 # Plotly plot -------------------------------------------------------------
@@ -154,7 +186,7 @@ server <- function(input, output, session) {
 
         #Define nodes
         node = list(
-          label = nodes$name,
+          label = nodes$node,
           customdata = nodes$n_refs,
           color = nodes$color,
           hovertemplate = "%{label}<br>%{customdata:.d} references<extra></extra>",
@@ -201,10 +233,10 @@ server <- function(input, output, session) {
         ) %>%
         # add step labels
         add_annotations(
-          text = c("<b>Domain</b>", "<b>Biomarker</b>", "<b>Collection Method</b>",
-                   "<b>Frequency of Feedback</b>", "<b>Communication</b>",
-                   "<b>Behavior</b>", "<b>Outcome</b>"),
-          x = seq(0, 1, length.out = 7),
+          text = c("<b>Domain</b>", "<b>Biomarker</b>", "<b>Collection <br> Method</b>",
+                   "<b>Frequency of <br> Feedback</b>", "<b>Communication</b>",
+                   "<b>Behavior</b>", "<b>Outcome</b>", ""),
+          x = seq(0, 1, length.out = 8),
           y = -0.1, #below the bottom.  Use >1 for above the top.
           xanchor = "center", #center labels on steps
           showarrow = FALSE,
