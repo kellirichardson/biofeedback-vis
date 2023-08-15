@@ -32,6 +32,7 @@ ui <- fluidPage(
   h1("Health Behavior Change Interventions Using Biological Feedback"),
   p("Below is an interactive visualization of data from a scoping review on biological feedback as a behavior change technique for adults in randomized clinical trials.
     Protocol DOI: 10.2196/32579"),
+  tags$head(includeHTML("google_analytics.html")),
   fluidRow(
 
 ## Input panel -------------------------------------------------------------
