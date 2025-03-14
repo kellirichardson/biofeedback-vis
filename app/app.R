@@ -1,7 +1,9 @@
 library(shiny)
 library(shinyWidgets) #for selectizeGroup widget
 library(shinycssloaders) #for loading indicator
-library(tidyverse)
+# library(tidyverse)
+library(dplyr)
+library(readr)
 library(ggsankey)
 library(plotly)
 library(colorspace)

@@ -1,6 +1,10 @@
 #Wrangle data
 
-library(tidyverse) 
+# library(tidyverse) 
+library(readr)
+library(dplyr)
+library(tidyr)
+library(stringr)
 library(janitor)
 
 # Read in data ------------------------------------------------------------
